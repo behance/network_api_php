@@ -8,9 +8,9 @@ See [http://be.net/dev](http://be.net/dev) for more information and documentatio
 
 Installation / Usage
 --------------------
+
 1. Please register for an application ID + key first: [http://be.net/dev/register](http://be.net/dev/register)
-2. Requires PHP 5.3+
-3. Usage.
+2. Usage.
 
    ``` php
    require_once( './lib/Be/Api.php' );
@@ -40,3 +40,8 @@ Installation / Usage
    $api->searchProjects( array( 'q' => 'motorcycles' ) );
 
    ```
+
+Requirements
+------------
+
+Requires PHP 5.3+
