@@ -1,8 +1,13 @@
 <?php
 /**
- * Basic implementation of accessing Users, Projects and Works in Progress on the Behance Network
+ * Basic Behance Network API implementation to
+ * accessing Users, Projects and Works in Progress data
  *
- * Register your application @ http://www.behance.net/dev
+ * Register your application FIRST: http://be.net/dev
+ *
+ * @author   Bryan Latten <bryan@behance.com>
+ * @link     http://be.net/dev
+ *
  */
 class Be_Api {
 
