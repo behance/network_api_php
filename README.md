@@ -1,7 +1,7 @@
 Behance Network API / PHP (5.3+)
 ================================
 
-Basic Behance Network API implementation to accessing Users, Projects and Works in Progress data
+Basic implementation to access User, Project and Work in Progress data
 
 See [http://be.net/dev](http://be.net/dev) for more information and documentation.
 
