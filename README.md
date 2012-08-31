@@ -44,4 +44,5 @@ Installation / Usage
 Requirements
 ------------
 
-Requires PHP 5.3+
+1. Requires PHP 5.3+
+2. PHP cURL module
