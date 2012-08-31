@@ -19,6 +19,7 @@ class Be_Api {
 
   const TIMEOUT_DEFAULT_SEC = 30;
 
+
   protected $_api_id, $_api_key, $_debug;
 
 
@@ -46,15 +47,16 @@ class Be_Api {
   /**
    * Retrieves a full Project, by ID
    *
-   * @param int $id
+   * @param int  $id    : which project to retrieve
+   * @param bool $assoc : return object will be converted to an associative array
    *
-   * @return stdClass|bool: false on failure
+   * @return array|stdClass|bool: array or stdClass based on $assoc, false on failure
    */
-  public function getProject( $id ) {
+  public function getProject( $id, $assoc = false ) {
 
     $endpoint = static::ENDPOINT_PROJECTS . '/' . $id;
 
-    return $this->_getDecodedJson( $endpoint, array(), 'project' );
+    return $this->_getDecodedJson( $endpoint, array(), 'project', $assoc );
 
   } // getProject
 
@@ -62,15 +64,20 @@ class Be_Api {
   /**
    * Retrieves a list of a projects comments, by project ID
    *
-   * @param int $id
+   * @param int  $id    : which project to retrieve comments for
+   * @param bool $assoc : return objects will be converted to associative arrays
    *
-   * @return array|bool: array of stdClass objects, false on failure
+   * @return array : stdClass objects or associative arrays, based on $assoc
    */
-  public function getProjectComments( $id ) {
+  public function getProjectComments( $id, $assoc = false ) {
 
     $endpoint = static::ENDPOINT_PROJECTS . "/{$id}/comments";
+    $results  = $this->_getDecodedJson( $endpoint, array(), 'comments', $assoc );
 
-    return $this->_getDecodedJson( $endpoint, array(), 'comments' );
+    // IMPORTANT: Ensure this will always return an array
+    return ( empty( $results ) )
+           ? array()
+           : $results;
 
   } // getProjectComments
 
@@ -78,15 +85,16 @@ class Be_Api {
   /**
    * Retrieves a full User, based on either their ID or Username
    *
-   * @param int|string $id_or_username
+   * @param int|string $id_or_username : who to retrieve
+   * @param bool $assoc                : return object will be converted to an associative array
    *
-   * @return stdClass|bool: false on failure
+   * @return array|stdClass|bool: array or stdClass based on $assoc, false on failure
    */
-  public function getUser( $id_or_username ) {
+  public function getUser( $id_or_username, $assoc = false ) {
 
     $endpoint = static::ENDPOINT_USERS . '/' . $id_or_username;
 
-    return $this->_getDecodedJson( $endpoint, array(), 'user' );
+    return $this->_getDecodedJson( $endpoint, array(), 'user', $assoc );
 
   } // getUser
 
@@ -94,15 +102,20 @@ class Be_Api {
   /**
    * Retrieves a list of $id_or_username's projects
    *
-   * @param int|string $id_or_username
+   * @param int|string $id_or_username : user's projects to search
+   * @param bool       $assoc          : return objects will be converted to associative arrays
    *
-   * @return array|bool: array of stdClass objects, false on failure
+   * @return array : stdClass objects or associative arrays, based on $assoc
    */
-  public function getUserProjects( $id_or_username ) {
+  public function getUserProjects( $id_or_username, $assoc = false ) {
 
     $endpoint = static::ENDPOINT_USERS . '/' . $id_or_username . '/projects';
+    $results  = $this->_getDecodedJson( $endpoint, array(), 'projects', $assoc );
 
-    return $this->_getDecodedJson( $endpoint, array(), 'projects' );
+    // IMPORTANT: Ensure this will always return an array
+    return ( empty( $results ) )
+           ? array()
+           : $results;
 
   } // getUserProjects
 
@@ -110,15 +123,20 @@ class Be_Api {
   /**
    * Retrieves a list of $id_or_username's works in progress
    *
-   * @param int|string $id_or_username
+   * @param int|string $id_or_username : user's works in progress to search
+   * @param bool       $assoc          : return objects will be converted to associative arrays
    *
-   * @return array|bool: array of stdClass objects, false on failure
+   * @return array : stdClass objects or associative arrays, based on $assoc
    */
-  public function getUserWips( $id_or_username ) {
+  public function getUserWips( $id_or_username, $assoc = false ) {
 
     $endpoint = static::ENDPOINT_USERS . '/' . $id_or_username . '/wips';
+    $results  = $this->_getDecodedJson( $endpoint, array(), 'wips', $assoc );
 
-    return $this->_getDecodedJson( $endpoint, array(), 'wips' );
+    // IMPORTANT: Ensure this will always return an array
+    return ( empty( $results ) )
+           ? array()
+           : $results;
 
   } // getUserWips
 
@@ -126,15 +144,16 @@ class Be_Api {
   /**
    * Retrieves a full Work In Progress, by ID
    *
-   * @param int $id
+   * @param int  $id
+   * @param bool $assoc : return object will be converted to an associative array
    *
-   * @return stdClass|bool: false on failure
+   * @return array|stdClass|bool: array or stdClass based on $assoc, false on failure
    */
-  public function getWorkInProgress( $id ) {
+  public function getWorkInProgress( $id, $assoc = false ) {
 
     $endpoint = static::ENDPOINT_WIPS . '/' . $id;
 
-    return $this->_getDecodedJson( $endpoint, array(), 'wip' );
+    return $this->_getDecodedJson( $endpoint, array(), 'wip', $assoc );
 
   } // getWorkInProgress
 
@@ -142,15 +161,20 @@ class Be_Api {
   /**
    * Search projects, by these $params
    *
-   * @param array $params: if empty defaults to featured projects
+   * @param array $params : if empty defaults to featured projects
+   * @param bool  $assoc  : return objects will be converted to associative arrays
    *
-   * @return array|bool: array of stdClass objects, false on failure
+   * @return array        : stdClass objects or associative arrays, based on $assoc
    */
-  public function searchProjects( array $params = array() ) {
+  public function searchProjects( array $params = array(), $assoc = false ) {
 
     $endpoint = static::ENDPOINT_PROJECTS;
+    $results  = $this->_getDecodedJson( $endpoint, $params, 'projects', $assoc );
 
-    return $this->_getDecodedJson( $endpoint, $params, 'projects' );
+    // IMPORTANT: Ensure this will always return an array
+    return ( empty( $results ) )
+           ? array()
+           : $results;
 
   } // searchProjects
 
@@ -158,15 +182,20 @@ class Be_Api {
   /**
    * Search users, by these $params
    *
-   * @param array $params: if empty defaults to featured users
+   * @param array $params : if empty defaults to featured users
+   * @param bool  $assoc  : return objects will be converted to associative arrays
    *
-   * @return array|bool: array of stdClass objects, false on failure
+   * @return array        : stdClass objects or associative arrays, based on $assoc
    */
-  public function searchUsers( array $params = array() ) {
+  public function searchUsers( array $params = array(), $assoc = false ) {
 
     $endpoint = static::ENDPOINT_USERS;
+    $results  =  $this->_getDecodedJson( $endpoint, $params, 'users', $assoc );
 
-    return $this->_getDecodedJson( $endpoint, $params, 'users' );
+    // IMPORTANT: Ensure this will always return an array
+    return ( empty( $results ) )
+           ? array()
+           : $results;
 
   } // searchUsers
 
@@ -174,15 +203,20 @@ class Be_Api {
   /**
    * Search works in progress, by these $params
    *
-   * @param array $params: if empty defaults to featured works in progress
+   * @param array $params : if empty defaults to featured works in progress
+   * @param bool  $assoc  : return objects will be converted to associative arrays
    *
-   * @return array|bool: array of stdClass objects, false on failure
+   * @return array        : stdClass objects or associative arrays, based on $assoc
    */
-  public function searchWips( array $params = array() ) {
+  public function searchWips( array $params = array(), $assoc = false ) {
 
     $endpoint = static::ENDPOINT_WIPS;
+    $results  = $this->_getDecodedJson( $endpoint, $params, 'wips', $assoc );
 
-    return $this->_getDecodedJson( $endpoint, $params, 'wips' );
+    // IMPORTANT: Ensure this will always return an array
+    return ( empty( $results ) )
+           ? array()
+           : $results;
 
   } // searchWips
 
@@ -192,20 +226,29 @@ class Be_Api {
   /**
    * Automates retrieval data from $endpoint, using $query_params, and returns stdClass based on presence of $root_node
    *
-   * @param string $endpoint    : API segment to retrieve
-   * @param array $query_params : anything additional to add to the query string, in key => value form
-   * @param string $root_node   : first object property of JSON response object where the data is attached
+   * @param string $endpoint     : API segment to retrieve
+   * @param array  $query_params : anything additional to add to the query string, in key => value form
+   * @param string $root_node    : first object property of JSON response object where the data is attached
+   * @param bool   $assoc        : when TRUE, returned objects will be converted into associative array
    *
    * @return stdClass|bool
    */
-  protected function _getDecodedJson( $endpoint, array $query_params, $root_node ) {
+  protected function _getDecodedJson( $endpoint, array $query_params, $root_node, $assoc ) {
 
     $entity = $this->_get( $endpoint, $query_params );
 
     if ( empty( $entity ) )
       return false;
 
-    $entity = json_decode( $entity );
+    $entity = json_decode( $entity, $assoc );
+
+    if ( $assoc ) {
+
+      return ( empty( $entity[ $root_node ] ) )
+             ? false
+             : $entity[ $root_node ];
+
+    } // if assoc
 
     return ( empty( $entity->{$root_node} ) )
            ? false
