@@ -221,6 +221,28 @@ class Be_Api {
 
   
   /**
+   * Retrieves a list of $id_or_username's collections
+   *
+   * @param int|string $id_or_username : user's works in progress to search
+   * @param bool       $assoc          : return objects will be converted to associative arrays
+   *
+   * @return array : stdClass objects or associative arrays, based on $assoc
+   */
+  public function getUserCollections( $id_or_username, $assoc = false ) {
+
+    $endpoint = static::ENDPOINT_USERS . "/{$id_or_username}/collections";
+
+    $results  = $this->_getDecodedJson( $endpoint, array(), 'collections', $assoc );
+
+    // IMPORTANT: Ensure this will always return an array
+    return ( empty( $results ) )
+           ? array()
+           : $results;
+
+  } // getUserCollections  
+  
+  
+  /**
    * Search projects, by these $params
    *
    * @param array $params : if empty defaults to featured projects
