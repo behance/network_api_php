@@ -11,11 +11,13 @@
  */
 class Be_Api {
 
-  const API_ROOT          = 'http://www.behance.net/v2';
+  const API_ROOT             = 'http://www.behance.net/v2';
 
-  const ENDPOINT_PROJECTS = '/projects';
-  const ENDPOINT_USERS    = '/users';
-  const ENDPOINT_WIPS     = '/wips';
+  const ENDPOINT_PROJECTS    = '/projects';
+  const ENDPOINT_USERS       = '/users';
+  const ENDPOINT_WIPS        = '/wips';
+  const ENDPOINT_COLLECTIONS = '/collections';
+
 
   const TIMEOUT_DEFAULT_SEC = 30;
 
@@ -180,6 +182,44 @@ class Be_Api {
 
 
   /**
+   * Retrieves a collcetion, by ID
+   *
+   * @param int  $id    : which collection to retrieve
+   * @param bool $assoc : return object will be converted to an associative array
+   *
+   * @return array|stdClass|bool: array or stdClass based on $assoc, false on failure
+   */
+  public function getCollection( $id, $assoc = false ) {
+
+    $endpoint = static::ENDPOINT_COLLECTIONS . '/' . $id;
+
+    return $this->_getDecodedJson( $endpoint, array(), 'collection', $assoc );
+
+  } // getCollection
+
+  
+  /**
+   * Retrieves a list of collection $id's projects
+   *
+   * @param int|string $id    : collection's projects to search
+   * @param bool       $assoc : return objects will be converted to associative arrays
+   *
+   * @return array : stdClass objects or associative arrays, based on $assoc
+   */
+  public function getCollectionProjects( $id, $assoc = false ) {
+
+    $endpoint = static::ENDPOINT_COLLECTIONS . '/' . $id . '/projects';
+    $results  = $this->_getDecodedJson( $endpoint, array(), 'projects', $assoc );
+
+    // IMPORTANT: Ensure this will always return an array
+    return ( empty( $results ) )
+           ? array()
+           : $results;
+
+  } // getCollectionProjects  
+
+  
+  /**
    * Search projects, by these $params
    *
    * @param array $params : if empty defaults to featured projects
@@ -242,8 +282,27 @@ class Be_Api {
   } // searchWips
 
 
+  /**
+   * Search collections, by these $params
+   *
+   * @param array $params : if empty defaults to featured collections
+   * @param bool  $assoc  : return objects will be converted to associative arrays
+   *
+   * @return array        : stdClass objects or associative arrays, based on $assoc
+   */
+  public function searchCollections( array $params = array(), $assoc = false ) {
 
+    $endpoint = static::ENDPOINT_COLLECTIONS;
+    $results  = $this->_getDecodedJson( $endpoint, $params, 'collections', $assoc );
 
+    // IMPORTANT: Ensure this will always return an array
+    return ( empty( $results ) )
+           ? array()
+           : $results;
+
+  } // searchCollections
+
+  
   /**
    * Automates retrieval data from $endpoint, using $query_params, and returns stdClass based on presence of $root_node
    *
