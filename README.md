@@ -1,4 +1,4 @@
-Behance Network API / PHP (5.3+)
+Behance Network API / PHP (5.2+)
 ================================
 
 Basic implementation to access User, Project, Work in Progress and Collection data
@@ -44,5 +44,5 @@ Installation / Usage
 Requirements
 ------------
 
-1. Requires PHP 5.3+
+1. Requires PHP 5.2+
 2. PHP cURL module
