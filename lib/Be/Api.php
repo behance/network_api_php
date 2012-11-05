@@ -12,20 +12,27 @@
  */
 class Be_Api {
 
-  const ENDPOINT_PROJECTS    = '/projects';
-  const ENDPOINT_USERS       = '/users';
-  const ENDPOINT_WIPS        = '/wips';
-  const ENDPOINT_COLLECTIONS = '/collections';
+  const ENDPOINT_PROJECTS     = '/projects';
+  const ENDPOINT_USERS        = '/users';
+  const ENDPOINT_WIPS         = '/wips';
+  const ENDPOINT_COLLECTIONS  = '/collections';
+  const ENDPOINT_ACTIVITY     = '/activity';
+  const ENDPOINT_AUTHENTICATE = '/oauth/authenticate';
+  const ENDPOINT_TOKEN        = '/oauth/token';
 
 
   const TIMEOUT_DEFAULT_SEC  = 30;
+  const VALID                = 1;
+  const INVALID              = 0;
 
-  protected $_api_root       = 'http://www.behance.net/v2';
+  protected $_api_root       = 'https://net.dev13.be.lan/v2';
 
   protected $_api_id,
-            $_api_key,
-            $_debug;
-
+            $_client_id,
+            $_client_secret,
+            $_debug,
+            $_access_token,
+            $_state;
 
   /**
    * Information can be found @ http://www.behance.net/dev/apps
@@ -35,18 +42,89 @@ class Be_Api {
    *
    * @param bool   $debug: OUTPUTS failures if they occur (non-2xx responses)
    */
-  public function __construct( $api_id, $api_key, $debug = false ) {
+  public function __construct( $client_id, $client_secret, $debug = false ) {
 
     if ( !extension_loaded( 'curl' ) )
       throw new Exception( "cURL module is required" );
 
-    $this->_api_id  = $api_id;
-    $this->_api_key = $api_key;
-
-    $this->_debug   = $debug;
+    //$this->_api_id        = $api_id;
+    $this->_client_id     = $client_id;
+    $this->_client_secret = $client_secret;
+    $this->_debug         = $debug;
+    $this->_state         = uniqid();
 
   } // __construct
 
+  /**
+   * Redirects user to the Behance login page to accept/reject application permissions
+   * User will be redirected with code that can be exchanged for a token
+   *
+   * @param  string $redirect_uri: Uri user will be redirected to after accepting/rejection permissions  
+   */
+  public function authenticate( $redirect_uri, $scope ) {
+
+    $query_params = array(
+        'client_id'    => $this->_client_id,
+        'redirect_uri' => $redirect_uri,
+        'state'        => $this->_state,
+        'scope'        => $scope
+    );
+    
+    $url = $this->_makeFullURL( self::ENDPOINT_AUTHENTICATE, $query_params  );
+    
+    $this->_redirect( $url );
+
+  } // redirect
+
+  /**
+   * Makes code exchange for token
+   *
+   * @param  string $code         : Encrypted code to be exchanged for token
+   * @param  string $redirect_uri : Uri user will be redirected to after accepting/rejection permissions
+   * @param  string $grant_type   
+   * 
+   * @return string               : Authentication token
+   */
+  public function exchangeCodeForToken( $code, $redirect_uri, $grant_type = '' ){
+
+    $query_params = array(
+        'client_id'     => $this->_client_id,
+        'client_secret' => $this->_client_secret,
+        'redirect_uri'  => $redirect_uri,
+        'state'         => $this->_state,
+        'code'          => $code
+    );
+
+    if ( !empty( $grant_type ) ) 
+      $query_params['grant_type'] = $grant_type;
+
+    $response = json_decode( $this->_post( self::ENDPOINT_TOKEN, $query_params ) );
+
+    if ( empty( $response ) || $response->valid == self::INVALID ) {
+      
+      $errors = ( empty( $response->errors ) )
+                ? 'Could not get token'
+                : $response->errors;
+
+      throw new Exception( $errors );
+    
+    } // if invalid token
+     
+    $this->_access_token = $response->access_token;
+
+  } // token
+
+  public function getAccessToken() {
+    
+    return $this->_access_token;
+  
+  } // getToken
+
+  public function setAccessToken( $access_token ) {
+
+    $this->access_token = $access_token;
+
+  } // setAccessToken
 
   /**
    * Retrieves a full Project, by ID
@@ -166,6 +244,23 @@ class Be_Api {
   } // getUserWips
 
 
+  public function getUserActivity( $assoc = false ) {
+
+    $method   = 'POST';
+    
+    $endpoint = self::ENDPOINT_ACTIVITY ;
+    
+    $params['access_token'] = $this->_access_token;
+
+    $results = $this->_getDecodedJson( $endpoint, $params, 'activity', $assoc );
+
+    // IMPORTANT: Ensure this will always return an array
+    return ( empty( $results ) )
+           ? array()
+           : $results;
+  
+  } //getUserActivity
+
   /**
    * Retrieves a full Work In Progress, by ID
    *
@@ -241,6 +336,7 @@ class Be_Api {
            : $results;
 
   } // getUserCollections
+
 
 
   /**
@@ -337,9 +433,10 @@ class Be_Api {
    *
    * @return stdClass|bool
    */
-  protected function _getDecodedJson( $endpoint, array $query_params, $root_node, $assoc ) {
+  protected function _getDecodedJson( $endpoint, array $query_params, $root_node, $assoc, $method = 'GET' ) {
 
-    $entity = $this->_get( $endpoint, $query_params );
+    $method = '_' . strtolower( $method );
+    $entity = $this->$method( $endpoint, $query_params );
 
     if ( empty( $entity ) )
       return false;
@@ -373,7 +470,7 @@ class Be_Api {
 
     $full_url = $this->_makeFullURL( $endpoint, $query_params );
     $results  = false;
-
+    echo $full_url;
     try {
 
       return $this->_executeRequest( 'GET', $full_url );
@@ -391,6 +488,36 @@ class Be_Api {
 
   } // _get
 
+  /**
+   * Performs a POST request, isolates caller from exceptions
+   *
+   * @param string $endpoint     : just the segment of the API the request
+   * @param array  $query_params : anything additional to add to the query string, in key => value form
+   *
+   * @return string|bool: response body on success, false on failure
+   */
+  protected function _post( $endpoint, array $query_params = array() ) {
+
+    $full_url = $this->_makeFullURL( $endpoint );
+    
+    $results  = false;
+
+    try {
+
+      return $this->_executeRequest( 'POST', $full_url, $query_params );
+
+    } // try
+
+    catch( Exception $e ) {
+
+      if ( $this->_debug )
+        echo ( __CLASS__ . "::" . __LINE__ . ": " . $e->getMessage() );
+
+      return false;
+
+    } // catch
+
+  } // _post
 
   /**
    * Generates a fully-quality API url, with $endpoint + $query_params, automatically adds in app's key
@@ -400,7 +527,7 @@ class Be_Api {
    */
   protected function _makeFullURL( $endpoint, array $query_params = array() ) {
 
-    $query_params['api_key'] = $this->_api_key;
+    $query_params['client_id'] = $this->_client_id;
 
     $query_string = '?' . http_build_query( $query_params );
     $full_url     = $this->_api_root . $endpoint . $query_string;
@@ -426,12 +553,13 @@ class Be_Api {
 
     $user_agent          = "Behance API/PHP (App {$this->_api_id})";
     $default_curl_params = array(
-        CURLOPT_HTTPHEADER      => array( 'Accept: application/json', 'Content-Type: application/json', 'Expect:' ),
+        CURLOPT_HTTPHEADER      => array( 'Accept: application/json', 'Content-Type: application/x-www-form-urlencoded', 'Expect:' ),
         CURLOPT_TIMEOUT         => self::TIMEOUT_DEFAULT_SEC,
         CURLOPT_USERAGENT       => $user_agent,
         CURLOPT_RETURNTRANSFER  => true,
         CURLOPT_BINARYTRANSFER  => true,
         CURLOPT_HEADER          => true,
+        CURLOPT_SSL_VERIFYPEER  => false
     );
 
     // Replace recursive will knock this *into* an array afterwards
@@ -515,8 +643,9 @@ class Be_Api {
 
 
     curl_close( $ch );
-
+    
     $header        = substr( $request_response, 0, $request_info['header_size'] );
+
     $response_body = false;
 
 
@@ -555,7 +684,20 @@ class Be_Api {
 
 
   } // _executeRequest
+  
+  /**
+   * Redirects user to specified url 
+   * 
+   * @param  string $location : Url to redirect user
+   */
+  protected function _redirect( $location ) {
+
+    header( "Location: {$location}" );
+    exit;
+  
+  } // _redirect
 
 
 } // Be_Api
 
++
