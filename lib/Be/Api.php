@@ -570,6 +570,19 @@ class Be_Api {
 
   } // searchCollections
 
+  public function followUser( $id_or_username, $assoc =  false ) {
+
+    $endpoint = self::ENDPOINT_COLLECTIONS . "/{$id_or_username}/follow";
+    $query_params['access_token'] = $this->_access_token;
+    $results  = $this->_post( $endpoint, $query_params );
+    
+    if ( empty( $response ) )
+      return false;
+
+    return json_decode( $response, $assoc );
+  
+  } // followUser
+
 
   /**
    * Automates retrieval data from $endpoint, using $query_params, and returns stdClass based on presence of $root_node
@@ -759,7 +772,7 @@ class Be_Api {
    */
   protected function _executeRequest( $method, $url, $request_body = false, $curl_params = array() ) {
 
-    $user_agent          = "Behance API/PHP (App {$this->_api_id})";
+    $user_agent          = "Behance API/PHP (App {$this->_client_id})";
     $default_curl_params = array(
         CURLOPT_HTTPHEADER      => array( 'Accept: application/json', 'Content-Type: multipart/form-data', 'Expect:' ),
         CURLOPT_TIMEOUT         => self::TIMEOUT_DEFAULT_SEC,
