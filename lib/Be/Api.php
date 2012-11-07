@@ -570,11 +570,11 @@ class Be_Api {
 
   } // searchCollections
 
-  public function followUser( $id_or_username, $assoc =  false ) {
+   public function followUser( $id_or_username, $assoc =  false ) {
 
-    $endpoint = self::ENDPOINT_COLLECTIONS . "/{$id_or_username}/follow";
+    $endpoint = self::ENDPOINT_USERS . "/{$id_or_username}/follow";
     $query_params['access_token'] = $this->_access_token;
-    $results  = $this->_post( $endpoint, $query_params );
+    $response  = $this->_post( $endpoint, $query_params );
     
     if ( empty( $response ) )
       return false;
@@ -582,6 +582,19 @@ class Be_Api {
     return json_decode( $response, $assoc );
   
   } // followUser
+
+  public function unfollowUser( $id_or_username, $assoc =  false ) {
+
+    $endpoint = self::ENDPOINT_USERS . "/{$id_or_username}/follow";
+    $query_params['access_token'] = $this->_access_token;
+    $response  = $this->_delete( $endpoint, $query_params );
+    
+    if ( empty( $response ) )
+      return false;
+
+    return json_decode( $response, $assoc );
+  
+  } // unfollowUser
 
 
   /**
