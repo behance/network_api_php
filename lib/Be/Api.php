@@ -249,7 +249,165 @@ class Be_Api {
 
   } // getUserWips
 
+ /**
+  * Create new Work in Progress ( WIP ) 
+  * 
+  * @param  string          $image_path  : full image path
+  * @param  string          $title       : title of WIP
+  * @param  array           $tags        : tags assoicated with wip
+  * @param  string          $description : description of wip
+  * @param  boolean         $assoc       : return objects will be converted to associative arrays
+  * 
+  * @return array                        : stdClass objects or associative arrays, based on $assoc
+  */
+  public function createUserWip( $image_path, $title, array $tags, $description = '', $assoc = false ) {
+
+    $endpoint               = self::ENDPOINT_WIPS;
+    
+    $query_params['access_token'] = $this->_access_token;
+    
+    $post_body['tags']         = implode( '|', $tags );
+    $post_body['image']        = '@' . $image_path;
+    $post_body['title']        = $title;
+    $post_body['description']  = $description;
+    
+
+    $curl_params[ CURLOPT_HTTPHEADER ] = array( 'Content-Type: multipart/form-data' );
+
+    $response = $this->_post( $endpoint, $query_params, $post_body, $curl_params );
+
+    if ( empty( $response ) )
+      return false;
+
+    return json_decode( $response, $assoc );
+    
+  } // createUserWip
+
+  /**
+   * Update WIP title
+   * 
+   * @param  string  $wip_id       : WIP to be updated
+   * @param  string  $title        : WIP title
+   * @param  boolean $assoc        : return objects will be converted to associative arrays
+   * 
+   * @return array                : stdClass objects or associative arrays, based on $assoc
+   */
+  public function updateUserWipTitle( $wip_id, $title, $assoc = false ) {
+
+    $endpoint = self::ENDPOINT_WIPS . '/' . $wip_id ;
+
+    $query_params['access_token'] = $this->_access_token;
+
+    $put_body['title']            = $title;
+   
+    $response = $this->_put( $endpoint, $query_params, $put_body );
+
+    if ( empty( $response ) )
+      return false;
+
+    return json_decode( $response, $assoc );
+
+  } //updateUserWipTitle
+
+  /**
+   * Update WIP description
+   * 
+   * @param  [type]  $wip_id      [description]
+   * @param  [type]  $revision_id [description]
+   * @param  [type]  $description [description]
+   * @param  boolean $assoc       [description]
+   * 
+   * @return [type]               [description]
+   */
+  public function updateUserWipRevisionDescription( $wip_id, $revision_id, $description, $assoc = false ) {
+
+    $endpoint = self::ENDPOINT_WIPS . '/' . $wip_id . '/' . $revision_id;
+
+    $query_params['access_token'] = $this->_access_token;
+
+    $put_body['description']      = $description;
+   
+    $response = $this->_put( $endpoint, $query_params, $put_body );
+
+    if ( empty( $response ) )
+      return false;
+
+    return json_decode( $response, $assoc );
+
+  } //updateUserWipRevisionDescription
+
+  /**
+   * Update WIP revision tags
+   * 
+   * @param  string  $wip_id      : WIP to be updated
+   * @param  string  $revision_id : WIP revision to be updated
+   * @param  array   $tags        : WIP revision tags
+   * @param  boolean $assoc       : return objects will be converted to associative arrays
+   * 
+   * @return array                : stdClass objects or associative arrays, based on $assoc
+   */
+  public function updateUserWipRevisionTags( $wip_id, $revision_id, array $tags, $assoc = false ) {
+
+    $endpoint = self::ENDPOINT_WIPS . '/' . $wip_id . '/' . $revision_id;
+
+    $query_params['access_token'] = $this->_access_token;
+
+    $put_body['tags']             = implode( '|', $tags );
+   
+    $response = $this->_put( $endpoint, $query_params, $put_body );
+
+    if ( empty( $response ) )
+      return false;
+
+    return json_decode( $response, $assoc );
+
+  } //updateUserWipRevisionTags
+
+  /**
+   * Delete WIP revision
+   * 
+   * @param  string  $wip_id      :WIP to be deleted
+   * @param  string  $revision_id :revision to be deleted
+   * @param  boolean $assoc       :return objects will be converted to associative arrays 
+   * 
+   * @return array                : stdClass objects or associative arrays, based on $assoc
+   */
+  public function deleteUserWipRevision( $wip_id, $revision_id, $assoc = false ) {
+
+    $endpoint = self::ENDPOINT_WIPS . '/' . $wip_id . '/' . $revision_id;
+
+    $query_params['access_token'] = $this->_access_token;
+
+    $response = $this->_delete( $endpoint, $query_params );
+
+    if ( empty( $response ) )
+      return false;
+
+    return json_decode( $response, $assoc );
+
+  } //deleteUserWipRevision
+  
+  /**
+   * Get user's activity feed
+   * 
+   * @param  boolean $assoc :return objects will be converted to associative arrays  
+   * 
+   * @return array          :stdClass objects or associative arrays, based on $assoc
+   */
+  public function getUserActivity( $assoc = false ) {
  
+    $endpoint = self::ENDPOINT_ACTIVITY ;
+    
+    $params['access_token'] = $this->_access_token;
+
+    $results = $this->_getDecodedJson( $endpoint, $params, 'activity', $assoc );
+
+    // IMPORTANT: Ensure this will always return an array
+    return ( empty( $results ) )
+           ? array()
+           : $results;
+  
+  } //getUserActivity
 
   /**
    * Retrieves a full Work In Progress, by ID
@@ -304,6 +462,7 @@ class Be_Api {
            : $results;
 
   } // getCollectionProjects
+
 
   /**
    * Retrieves a list of $id_or_username's collections
