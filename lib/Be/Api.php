@@ -27,12 +27,11 @@ class Be_Api {
 
   protected $_api_root       = 'https://net.dev13.be.lan/v2';
 
-  protected $_api_id,
-            $_client_id,
+  protected $_client_id,
             $_client_secret,
             $_debug,
-            $_access_token,
-            $_state;
+            $_access_token;
+
 
   /**
    * Information can be found @ http://www.behance.net/dev/apps
@@ -47,11 +46,10 @@ class Be_Api {
     if ( !extension_loaded( 'curl' ) )
       throw new Exception( "cURL module is required" );
 
-    //$this->_api_id        = $api_id;
     $this->_client_id     = $client_id;
     $this->_client_secret = $client_secret;
     $this->_debug         = $debug;
-    $this->_state         = uniqid();
+    
 
   } // __construct
 
@@ -59,17 +57,22 @@ class Be_Api {
    * Redirects user to the Behance login page to accept/reject application permissions
    * User will be redirected with code that can be exchanged for a token
    *
-   * @param  string $redirect_uri: Uri user will be redirected to after accepting/rejection permissions  
+   * @param  string $redirect_uri :Uri user will be redirected to after accepting/rejection permissions  
+   * @param  string $scope        :Permission scope type 
+   * @param  string $state        :state value
    */
-  public function authenticate( $redirect_uri, $scope ) {
+  public function authenticate( $redirect_uri, $scope, $state = '' ) {
 
     $query_params = array(
         'client_id'    => $this->_client_id,
         'redirect_uri' => $redirect_uri,
-        'state'        => $this->_state,
         'scope'        => $scope
     );
-    
+
+    $query_params['state'] = ( empty( $state ) )
+                             ? uniqid()
+                             : $state;
+
     $url = $this->_makeFullURL( self::ENDPOINT_AUTHENTICATE, $query_params  );
     
     $this->_redirect( $url );
@@ -81,24 +84,28 @@ class Be_Api {
    *
    * @param  string $code         : Encrypted code to be exchanged for token
    * @param  string $redirect_uri : Uri user will be redirected to after accepting/rejection permissions
-   * @param  string $grant_type   
+   * @param  string $state        : state value
+   * @param  string $grant_type   : Authorization grant type
    * 
    * @return string               : Authentication token
    */
-  public function exchangeCodeForToken( $code, $redirect_uri, $grant_type = '' ){
+  public function exchangeCodeForToken( $code, $redirect_uri, $state = '',  $grant_type = '' ){
 
     $query_params = array(
         'client_id'     => $this->_client_id,
         'client_secret' => $this->_client_secret,
         'redirect_uri'  => $redirect_uri,
-        'state'         => $this->_state,
         'code'          => $code
     );
+
+    $query_params['state'] = ( empty( $state ) )
+                             ? uniqid()
+                             : $state;
 
     if ( !empty( $grant_type ) ) 
       $query_params['grant_type'] = $grant_type;
 
-    $response = json_decode( $this->_post( self::ENDPOINT_TOKEN, $query_params ) );
+    $response = json_decode( $this->_post( self::ENDPOINT_TOKEN, array(), $query_params ) );
 
     if ( empty( $response ) || $response->valid == self::INVALID ) {
       
@@ -106,7 +113,7 @@ class Be_Api {
                 ? 'Could not get token'
                 : $response->errors;
 
-      throw new Exception( $errors );
+      throw new Be_Exception( $errors );
     
     } // if invalid token
      
@@ -122,10 +129,10 @@ class Be_Api {
 
   public function setAccessToken( $access_token ) {
 
-    $this->access_token = $access_token;
+    $this->_access_token = $access_token;
 
   } // setAccessToken
-
+ 
   /**
    * Retrieves a full Project, by ID
    *
@@ -222,14 +229,13 @@ class Be_Api {
 
   } // getUserAppreciations
 
-
   /**
    * Retrieves a list of $id_or_username's works in progress
    *
-   * @param int|string $id_or_username : user's works in progress to search
-   * @param bool       $assoc          : return objects will be converted to associative arrays
+   * @param  int|string $id_or_username : user's works in progress to search
+   * @param  bool       $assoc          : return objects will be converted to associative arrays
    *
-   * @return array : stdClass objects or associative arrays, based on $assoc
+   * @return array                      : stdClass objects or associative arrays, based on $assoc
    */
   public function getUserWips( $id_or_username, $assoc = false ) {
 
@@ -243,23 +249,7 @@ class Be_Api {
 
   } // getUserWips
 
-
-  public function getUserActivity( $assoc = false ) {
-
-    $method   = 'POST';
-    
-    $endpoint = self::ENDPOINT_ACTIVITY ;
-    
-    $params['access_token'] = $this->_access_token;
-
-    $results = $this->_getDecodedJson( $endpoint, $params, 'activity', $assoc );
-
-    // IMPORTANT: Ensure this will always return an array
-    return ( empty( $results ) )
-           ? array()
-           : $results;
-  
-  } //getUserActivity
+ 
 
   /**
    * Retrieves a full Work In Progress, by ID
@@ -314,7 +304,6 @@ class Be_Api {
            : $results;
 
   } // getCollectionProjects
-
 
   /**
    * Retrieves a list of $id_or_username's collections
@@ -433,10 +422,10 @@ class Be_Api {
    *
    * @return stdClass|bool
    */
-  protected function _getDecodedJson( $endpoint, array $query_params, $root_node, $assoc, $method = 'GET' ) {
+  protected function _getDecodedJson( $endpoint, array $query_params, $root_node, $assoc ) {
 
-    $method = '_' . strtolower( $method );
-    $entity = $this->$method( $endpoint, $query_params );
+    $query_params['client_id'] = $this->_client_id;
+    $entity = $this->_get( $endpoint, $query_params );
 
     if ( empty( $entity ) )
       return false;
@@ -470,7 +459,7 @@ class Be_Api {
 
     $full_url = $this->_makeFullURL( $endpoint, $query_params );
     $results  = false;
-    echo $full_url;
+
     try {
 
       return $this->_executeRequest( 'GET', $full_url );
@@ -496,15 +485,15 @@ class Be_Api {
    *
    * @return string|bool: response body on success, false on failure
    */
-  protected function _post( $endpoint, array $query_params = array() ) {
+  protected function _post( $endpoint, array $query_params = array(), $post_body = array(), $curl_params= array() ) {
 
-    $full_url = $this->_makeFullURL( $endpoint );
+    $full_url = $this->_makeFullURL( $endpoint, $query_params );
     
     $results  = false;
 
     try {
 
-      return $this->_executeRequest( 'POST', $full_url, $query_params );
+      return $this->_executeRequest( 'POST', $full_url, $post_body, $curl_params );
 
     } // try
 
@@ -519,6 +508,68 @@ class Be_Api {
 
   } // _post
 
+   /**
+   * Performs a PUT request, isolates caller from exceptions
+   *
+   * @param string $endpoint     : just the segment of the API the request
+   * @param array  $query_params : anything additional to add to the query string, in key => value form
+   *
+   * @return string|bool: response body on success, false on failure
+   */
+  protected function _put( $endpoint, array $query_params = array(), $put_body = array(), $curl_params= array() ) {
+
+    $full_url = $this->_makeFullURL( $endpoint, $query_params );
+    
+    $results  = false;
+
+    try {
+
+      return $this->_executeRequest( 'PUT', $full_url, $put_body, $curl_params );
+
+    } // try
+
+    catch( Exception $e ) {
+
+      if ( $this->_debug )
+        echo ( __CLASS__ . "::" . __LINE__ . ": " . $e->getMessage() );
+
+      return false;
+
+    } // catch
+
+  } // _put
+
+   /**
+   * Performs a DELETE request, isolates caller from exceptions
+   *
+   * @param string $endpoint     : just the segment of the API the request
+   * @param array  $query_params : anything additional to add to the query string, in key => value form
+   *
+   * @return string|bool: response body on success, false on failure
+   */
+  protected function _delete( $endpoint, array $query_params = array(), $delete_body = array(), $curl_params= array() ) {
+
+    $full_url = $this->_makeFullURL( $endpoint, $query_params );
+    
+    $results  = false;
+
+    try {
+
+      return $this->_executeRequest( 'DELETE', $full_url, $delete_body, $curl_params );
+
+    } // try
+
+    catch( Exception $e ) {
+
+      if ( $this->_debug )
+        echo ( __CLASS__ . "::" . __LINE__ . ": " . $e->getMessage() );
+
+      return false;
+
+    } // catch
+
+  } // _delete
+
   /**
    * Generates a fully-quality API url, with $endpoint + $query_params, automatically adds in app's key
    *
@@ -526,8 +577,6 @@ class Be_Api {
    * @param array  $query_params : anything additional to add to the query string, in key => value form
    */
   protected function _makeFullURL( $endpoint, array $query_params = array() ) {
-
-    $query_params['client_id'] = $this->_client_id;
 
     $query_string = '?' . http_build_query( $query_params );
     $full_url     = $this->_api_root . $endpoint . $query_string;
@@ -553,7 +602,7 @@ class Be_Api {
 
     $user_agent          = "Behance API/PHP (App {$this->_api_id})";
     $default_curl_params = array(
-        CURLOPT_HTTPHEADER      => array( 'Accept: application/json', 'Content-Type: application/x-www-form-urlencoded', 'Expect:' ),
+        CURLOPT_HTTPHEADER      => array( 'Accept: application/json', 'Content-Type: multipart/form-data', 'Expect:' ),
         CURLOPT_TIMEOUT         => self::TIMEOUT_DEFAULT_SEC,
         CURLOPT_USERAGENT       => $user_agent,
         CURLOPT_RETURNTRANSFER  => true,
@@ -585,10 +634,10 @@ class Be_Api {
 
         // IMPORTANT: Since @ is used to signify files in arrays passed to this option,
         // pre-encode this array to prevent this from attempting to read a file
-        if ( is_array( $request_body ) )
-          $request_body = http_build_query( $request_body );
+        // if ( is_array( $request_body ) )
+        //   $request_body = http_build_query( $request_body );
 
-        $curl_params[ CURLOPT_HTTPHEADER ][] = 'Content-Length: ' . strlen( $request_body );
+       // $curl_params[ CURLOPT_HTTPHEADER ][] = 'Content-Length: ' . strlen( $request_body );
         $curl_params[ CURLOPT_POSTFIELDS ] = $request_body;
         break;
 
@@ -630,7 +679,6 @@ class Be_Api {
 
     curl_setopt_array( $ch, $curl_params );
 
-
     ////////// MAKE THE REQUEST /////////
     $request_response = curl_exec( $ch );
     /////////////////////////////////////
@@ -641,7 +689,7 @@ class Be_Api {
     $curl_code     = curl_errno( $ch );
     $error_message = curl_error( $ch ); // Maintain if necessary, since the connection is closed
 
-
+    
     curl_close( $ch );
     
     $header        = substr( $request_response, 0, $request_info['header_size'] );
@@ -699,5 +747,3 @@ class Be_Api {
 
 
 } // Be_Api
-
-+
