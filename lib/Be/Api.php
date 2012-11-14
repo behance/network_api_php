@@ -57,9 +57,9 @@ class Be_Api {
    * Redirects user to the Behance login page to accept/reject application permissions
    * User will be redirected with code that can be exchanged for a token
    *
-   * @param  string $redirect_uri :Uri user will be redirected to after accepting/rejection permissions  
-   * @param  string $scope        :Permission scope type 
-   * @param  string $state        :state value
+   * @param  string $redirect_uri : Uri user will be redirected to after accepting/rejection permissions  
+   * @param  string $scope        : Permission scope type 
+   * @param  string $state        : state value
    */
   public function authenticate( $redirect_uri, array $scope, $state = '' ) {
 
@@ -136,10 +136,10 @@ class Be_Api {
   /**
    * Retrieves a full Project, by ID
    *
-   * @param int  $id    : which project to retrieve
-   * @param bool $assoc : return object will be converted to an associative array
+   * @param int  $id             : which project to retrieve
+   * @param bool $assoc          : return object will be converted to an associative array
    *
-   * @return array|stdClass|bool: array or stdClass based on $assoc, false on failure
+   * @return array|stdClass|bool : array or stdClass based on $assoc, false on failure
    */
   public function getProject( $id, $assoc = false ) {
 
@@ -156,7 +156,7 @@ class Be_Api {
    * @param int  $id    : which project to retrieve comments for
    * @param bool $assoc : return objects will be converted to associative arrays
    *
-   * @return array : stdClass objects or associative arrays, based on $assoc
+   * @return array      : stdClass objects or associative arrays, based on $assoc
    */
   public function getProjectComments( $id, $assoc = false ) {
 
@@ -177,7 +177,7 @@ class Be_Api {
    * @param int|string $id_or_username : who to retrieve
    * @param bool $assoc                : return object will be converted to an associative array
    *
-   * @return array|stdClass|bool: array or stdClass based on $assoc, false on failure
+   * @return array|stdClass|bool       : array or stdClass based on $assoc, false on failure
    */
   public function getUser( $id_or_username, $assoc = false ) {
 
@@ -194,7 +194,7 @@ class Be_Api {
    * @param int|string $id_or_username : user's projects to search
    * @param bool       $assoc          : return objects will be converted to associative arrays
    *
-   * @return array : stdClass objects or associative arrays, based on $assoc
+   * @return array                     : stdClass objects or associative arrays, based on $assoc
    */
   public function getUserProjects( $id_or_username, $assoc = false ) {
 
@@ -215,7 +215,7 @@ class Be_Api {
    * @param int|string $id_or_username : user's projects to search
    * @param bool       $assoc          : return objects will be converted to associative arrays
    *
-   * @return array : stdClass objects or associative arrays, based on $assoc
+   * @return array                     : stdClass objects or associative arrays, based on $assoc
    */
   public function getUserAppreciations( $id_or_username, $assoc = false ) {
 
@@ -289,7 +289,7 @@ class Be_Api {
    * @param  string  $title        : WIP title
    * @param  boolean $assoc        : return objects will be converted to associative arrays
    * 
-   * @return array                : stdClass objects or associative arrays, based on $assoc
+   * @return array                 : stdClass objects or associative arrays, based on $assoc
    */
   public function updateUserWipTitle( $wip_id, $title, $assoc = false ) {
 
@@ -310,12 +310,12 @@ class Be_Api {
   /**
    * Update WIP description
    * 
-   * @param  [type]  $wip_id      [description]
-   * @param  [type]  $revision_id [description]
-   * @param  [type]  $description [description]
-   * @param  boolean $assoc       [description]
+   * @param  int     $wip_id       : WIP ID
+   * @param  int     $revision_id  : revision id
+   * @param  string  $description  : WIP description
+   * @param  boolean $assoc        : return objects will be converted to associative arrays
    * 
-   * @return [type]               [description]
+   * @return array                 : stdClass objects or associative arrays, based on $assoc
    */
   public function updateUserWipRevisionDescription( $wip_id, $revision_id, $description, $assoc = false ) {
 
@@ -430,9 +430,9 @@ class Be_Api {
    * Retrieves a full Work In Progress, by ID
    *
    * @param int  $id
-   * @param bool $assoc : return object will be converted to an associative array
+   * @param bool $assoc          : return object will be converted to an associative array
    *
-   * @return array|stdClass|bool: array or stdClass based on $assoc, false on failure
+   * @return array|stdClass|bool : array or stdClass based on $assoc, false on failure
    */
   public function getWorkInProgress( $id, $assoc = false ) {
 
@@ -453,7 +453,7 @@ class Be_Api {
    * @param  int     $id    : which collection to retrieve
    * @param  boolean $assoc : return objects will be converted to associative arrays
    *
-   * @return array : stdClass objects or associative arrays, based on $assoc
+   * @return array          : stdClass objects or associative arrays, based on $assoc
    */
   public function getCollection( $id, $assoc = false ) {
 
@@ -475,7 +475,7 @@ class Be_Api {
    * @param  array   $project_ids : projects to add to collection
    * @param  boolean $assoc       : return objects will be converted to associative arrays
    *
-   * @return array : stdClass objects or associative arrays, based on $assoc
+   * @return array                : stdClass objects or associative arrays, based on $assoc
    */
   public function createCollection( $title, $project_ids = array(), $assoc = false ) {
 
@@ -502,7 +502,7 @@ class Be_Api {
    * @param  int     $id    : which collection to delete
    * @param  boolean $assoc : return objects will be converted to associative arrays
    *
-   * @return array : stdClass objects or associative arrays, based on $assoc
+   * @return array          : stdClass objects or associative arrays, based on $assoc
    */
   public function deleteCollection( $id, $assoc = false ) {
 
@@ -525,7 +525,7 @@ class Be_Api {
    * @param string  $title : new collection title
    * @param boolean $assoc : return objects will be converted to associative arrays
    *
-   * @return array : stdClass objects or associative arrays, based on $assoc
+   * @return array         : stdClass objects or associative arrays, based on $assoc
    */
   public function updateCollection( $id, $title, $assoc = false ) {
 
@@ -545,10 +545,10 @@ class Be_Api {
   /**
    * Retrieves a list of collection $id's projects
    *
-   * @param int|string $id    : collection's projects to search
-   * @param bool       $assoc : return objects will be converted to associative arrays
+   * @param int   $id    : collection's projects to search
+   * @param bool  $assoc : return objects will be converted to associative arrays
    *
-   * @return array : stdClass objects or associative arrays, based on $assoc
+   * @return array       : stdClass objects or associative arrays, based on $assoc
    */
   public function getCollectionProjects( $id, $assoc = false ) {
 
@@ -566,11 +566,11 @@ class Be_Api {
   /**
    * Add projects to collection
    * 
-   * @param int|string $id          : collection to add projects
-   * @param array      $project_ids : projects to add to collection
-   * @param boolean    $assoc       : return objects will be converted to associative arrays
+   * @param int     $id          : collection to add projects
+   * @param array   $project_ids : projects to add to collection
+   * @param boolean $assoc       : return objects will be converted to associative arrays
    *
-   * @return array : stdClass objects or associative arrays, based on $assoc
+   * @return array               : stdClass objects or associative arrays, based on $assoc
    */
   public function addProjectsToCollection( $id, array $project_ids, $assoc = false ) {
 
@@ -594,11 +594,11 @@ class Be_Api {
   /**
    * Remove project from collection
    * 
-   * @param int|string $id         : collection to remove project
+   * @param int        $id         : collection to remove project
    * @param int        $project_id : project to remove from collection
    * @param boolean    $assoc      : return objects will be converted to associative arrays
    *
-   * @return array : stdClass objects or associative arrays, based on $assoc
+   * @return array                 : stdClass objects or associative arrays, based on $assoc
    */
   public function removeProjectFromCollection(  $id, $project_id, $assoc = false ) {
 
@@ -620,7 +620,7 @@ class Be_Api {
    * @param int|string $id_or_username : user's works in progress to search
    * @param bool       $assoc          : return objects will be converted to associative arrays
    *
-   * @return array : stdClass objects or associative arrays, based on $assoc
+   * @return array                     : stdClass objects or associative arrays, based on $assoc
    */
   public function getUserCollections( $id_or_username, $assoc = false ) {
 
@@ -638,10 +638,10 @@ class Be_Api {
   /**
    * Follow collection
    * 
-   * @param int|string $id    : collection to follow
-   * @param bool       $assoc : return objects will be converted to associative arrays
+   * @param int   $id    : collection to follow
+   * @param bool  $assoc : return objects will be converted to associative arrays
    * 
-   * @return array : stdClass objects or associative arrays, based on $assoc
+   * @return array       : stdClass objects or associative arrays, based on $assoc
    */
   public function followCollection( $id, $assoc = false ) {
     
@@ -660,10 +660,10 @@ class Be_Api {
   /**
    * Unfollow collection
    * 
-   * @param int|string $id    : collection to unfollow
-   * @param bool       $assoc : return objects will be converted to associative arrays
+   * @param int  $id    : collection to unfollow
+   * @param bool $assoc : return objects will be converted to associative arrays
    * 
-   * @return array : stdClass objects or associative arrays, based on $assoc
+   * @return array      : stdClass objects or associative arrays, based on $assoc
    */
   public function unfollowCollection( $id, $assoc = false ) {
     
@@ -769,7 +769,7 @@ class Be_Api {
    * @param int|string $id_or_username : user to follow
    * @param bool       $assoc          : return objects will be converted to associative arrays
    *
-   * @return array : stdClass objects or associative arrays, based on $assoc
+   * @return array                     : stdClass objects or associative arrays, based on $assoc
    */
   public function followUser( $id_or_username, $assoc =  false ) {
 
@@ -791,7 +791,7 @@ class Be_Api {
    * @param int|string $id_or_username : user to unfollow
    * @param bool       $assoc          : return objects will be converted to associative arrays
    *
-   * @return array : stdClass objects or associative arrays, based on $assoc
+   * @return array                     : stdClass objects or associative arrays, based on $assoc
    */
   public function unfollowUser( $id_or_username, $assoc =  false ) {
 
@@ -848,7 +848,7 @@ class Be_Api {
    * @param string $endpoint     : just the segment of the API the request
    * @param array  $query_params : anything additional to add to the query string, in key => value form
    *
-   * @return string|bool: response body on success, false on failure
+   * @return string|bool         : response body on success, false on failure
    */
   protected function _get( $endpoint, array $query_params = array() ) {
 
@@ -879,7 +879,7 @@ class Be_Api {
    * @param string $endpoint     : just the segment of the API the request
    * @param array  $query_params : anything additional to add to the query string, in key => value form
    *
-   * @return string|bool: response body on success, false on failure
+   * @return string|bool         : response body on success, false on failure
    */
   protected function _post( $endpoint, array $query_params = array(), $post_body = array(), $curl_params= array() ) {
 
@@ -910,7 +910,7 @@ class Be_Api {
    * @param string $endpoint     : just the segment of the API the request
    * @param array  $query_params : anything additional to add to the query string, in key => value form
    *
-   * @return string|bool: response body on success, false on failure
+   * @return string|bool         : response body on success, false on failure
    */
   protected function _put( $endpoint, array $query_params = array(), $put_body = array(), $curl_params= array() ) {
 
@@ -941,7 +941,7 @@ class Be_Api {
    * @param string $endpoint     : just the segment of the API the request
    * @param array  $query_params : anything additional to add to the query string, in key => value form
    *
-   * @return string|bool: response body on success, false on failure
+   * @return string|bool         : response body on success, false on failure
    */
   protected function _delete( $endpoint, array $query_params = array(), $delete_body = array(), $curl_params= array() ) {
 
@@ -992,7 +992,7 @@ class Be_Api {
    * @param string|array $request_body  : sent as HTTP body of request
    * @param array        $curl_params   : parameters to override for cURL library (timeouts, user agent, etc)
    *
-   * @return string: response body
+   * @return string                     : response body
    */
   protected function _executeRequest( $method, $url, $request_body = false, $curl_params = array() ) {
 
