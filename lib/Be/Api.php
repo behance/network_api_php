@@ -6,7 +6,7 @@
  * Register your application FIRST: http://be.net/dev
  *
  *
- * @author   Bryan Latten <bryan@behance.com>
+ * @author   Bryan Latten  <bryan@behance.com>
  * @author   Michael Klein <michael.klein@behance.com>
  * @link     http://be.net/dev
  *
@@ -26,7 +26,7 @@ class Be_Api {
   const VALID                = 1;
   const INVALID              = 0;
 
-  protected $_api_root       = 'https://behance.net/v2';
+  protected $_api_root       = 'https://www.behance.net/v2';
 
   protected $_client_id,
             $_client_secret,
