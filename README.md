@@ -15,7 +15,7 @@ Installation / Usage
    ``` php
    require_once( './lib/Be/Api.php' );
 
-   $api = new Be_Api( $api_id, $api_key );
+   $api = new Be_Api( $client_id, $client_secret );
 
    // User data
    $api->getUser( 'bryan' );
