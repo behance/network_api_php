@@ -1,6 +1,6 @@
 <?php
 
-require_once( 'Be_Exception.php' );
+require_once( 'Exception.php' );
 
 /**
  * Basic Behance Network API implementation to
