@@ -635,6 +635,40 @@ class Be_Api {
 
   } // getUserCollections
 
+  public function viewProject( $id, $assoc = false ) {
+    
+    $endpoint = self::ENDPOINT_PROJECTS . '/' . $id . '/view';
+
+    $query_params['access_token'] = $this->_access_token;
+
+    $response  = $this->_post( $endpoint, $query_params );
+    
+    return ( empty( $response ) )
+           ? false
+           : json_decode( $response, $assoc );
+    
+  } // viewProject
+  /**
+   * Appreciate project
+   * @param  int   $id    : project to be appreciated
+   * @param  bool  $assoc : return objects will be converted to associative arrays
+   *
+   * @return array        : stdClass objects or associative arrays, based on $assoc
+   */
+  public function appreciateProject( $id, $assoc = false ) {
+    
+    $endpoint = self::ENDPOINT_PROJECTS . '/' . $id . '/appreciate';
+
+    $query_params['access_token'] = $this->_access_token;
+
+    $response  = $this->_post( $endpoint, $query_params );
+
+    return ( empty( $response ) )
+           ? false
+           : json_decode( $response, $assoc );
+    
+  } // appreciateProject
+
   /**
    * Follow collection
    * 
