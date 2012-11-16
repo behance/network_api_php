@@ -1,4 +1,7 @@
 <?php
+
+require_once( 'Exception.php' );
+
 /**
  * Basic Behance Network API implementation to
  * accessing Users, Projects and Works in Progress data
@@ -44,7 +47,7 @@ class Be_Api {
   public function __construct( $client_id, $client_secret, $debug = false ) {
 
     if ( !extension_loaded( 'curl' ) )
-      throw new Exception( "cURL module is required" );
+      throw new Be_Exception( "cURL module is required" );
 
     $this->_client_id     = $client_id;
     $this->_client_secret = $client_secret;
@@ -634,6 +637,52 @@ class Be_Api {
            : $results;
 
   } // getUserCollections
+  
+  /**
+   * View project
+   * - increments project view counter
+   * - returns user appreciation info for given project
+   * 
+   * @param  int  $id    : project id
+   * @param  bool $assoc : return objects will be converted to associative arrays
+   *
+   * @return array       : stdClass objects or associative arrays, based on $assoc
+   */
+  public function viewProject( $id, $assoc = false ) {
+    
+    $endpoint = self::ENDPOINT_PROJECTS . '/' . $id . '/view';
+
+    $query_params['access_token'] = $this->_access_token;
+
+    $response  = $this->_post( $endpoint, $query_params );
+    
+    return ( empty( $response ) )
+           ? false
+           : json_decode( $response, $assoc );
+    
+  } // viewProject
+  
+  /**
+   * Appreciate project
+   * 
+   * @param  int   $id    : project to be appreciated
+   * @param  bool  $assoc : return objects will be converted to associative arrays
+   *
+   * @return array        : stdClass objects or associative arrays, based on $assoc
+   */
+  public function appreciateProject( $id, $assoc = false ) {
+    
+    $endpoint = self::ENDPOINT_PROJECTS . '/' . $id . '/appreciate';
+
+    $query_params['access_token'] = $this->_access_token;
+
+    $response  = $this->_post( $endpoint, $query_params );
+
+    return ( empty( $response ) )
+           ? false
+           : json_decode( $response, $assoc );
+    
+  } // appreciateProject
 
   /**
    * Follow collection
@@ -862,7 +911,7 @@ class Be_Api {
 
     } // try
 
-    catch( Exception $e ) {
+    catch( Be_Exception $e ) {
 
       if ( $this->_debug )
         echo ( __CLASS__ . "::" . __LINE__ . ": " . $e->getMessage() );
@@ -893,7 +942,7 @@ class Be_Api {
 
     } // try
 
-    catch( Exception $e ) {
+    catch( Be_Exception $e ) {
 
       if ( $this->_debug )
         echo ( __CLASS__ . "::" . __LINE__ . ": " . $e->getMessage() );
@@ -924,7 +973,7 @@ class Be_Api {
 
     } // try
 
-    catch( Exception $e ) {
+    catch( Be_Exception $e ) {
 
       if ( $this->_debug )
         echo ( __CLASS__ . "::" . __LINE__ . ": " . $e->getMessage() );
@@ -955,7 +1004,7 @@ class Be_Api {
 
     } // try
 
-    catch( Exception $e ) {
+    catch( Be_Exception $e ) {
 
       if ( $this->_debug )
         echo ( __CLASS__ . "::" . __LINE__ . ": " . $e->getMessage() );
@@ -985,7 +1034,7 @@ class Be_Api {
   /**
    * Makes a remote request to $url
    *
-   * @throws Exception: on any non-200 response from request
+   * @throws Be_Exception: on any non-200 response from request
    *
    * @param string       $method        : HTTP verb of request (get|post|post|delete|head)
    * @param string       $url           : fully-qualified destination of request
@@ -1067,7 +1116,7 @@ class Be_Api {
         break;
 
       default:
-        throw new Exception( "Unhandled method: [{$method}]" );
+        throw new Be_Exception( "Unhandled method: [{$method}]" );
 
     } // switch method
 
@@ -1116,12 +1165,12 @@ class Be_Api {
 
     // Unless array_shift completely solves headers in body problem, leave this line in
     if ( substr( $response_body, 0, 4 ) == 'HTTP' )
-      throw new Exception( "Malformed response_body: " . var_export( $response_body, 1 ) );
+      throw new Be_Exception( "Malformed response_body: " . var_export( $response_body, 1 ) );
 
 
-    // @throws Exception on response non-2xx (success) responses from service
+    // @throws Be_Exception on response non-2xx (success) responses from service
     if ( (int)round( $response_code, -2 ) !== 200 )
-      throw new Exception( "Unsuccessful Request, response ({$response_code}): " . ( empty( $response_body ) ? '' : ": {$response_body} " ) );
+      throw new Be_Exception( "Unsuccessful Request, response ({$response_code}): " . ( empty( $response_body ) ? '' : ": {$response_body} " ) );
 
 
     return $response_body;
