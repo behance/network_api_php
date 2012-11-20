@@ -127,6 +127,8 @@ class Be_Api {
 
     $this->_access_token = $response->access_token;
 
+    return $this->_access_token;
+
   } // token
 
   public function getAccessToken() {
