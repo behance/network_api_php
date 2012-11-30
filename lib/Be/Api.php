@@ -34,7 +34,8 @@ class Be_Api {
   protected $_client_id,
             $_client_secret,
             $_debug,
-            $_access_token;
+            $_access_token,
+            $_user;
 
   /**
    * Information can be found @ http://www.behance.net/dev/apps
@@ -86,7 +87,7 @@ class Be_Api {
   } // authenticate
 
   /**
-   * Makes code exchange for token
+   * Makes code exchange for token, sets $this->_user + $this->_access_token
    *
    * @see http://www.behance.net/dev/authentication#step-by-step
    *
@@ -125,24 +126,55 @@ class Be_Api {
 
     } // if invalid token
 
-    $this->_access_token = $response->access_token;
-
+    $this->setAccessToken( $response->access_token );
+    $this->setAuthenticatedUser( $response->user );
+    
     return $this->_access_token;
 
-  } // token
+  } // exchangeCodeForToken
 
+  /**
+   * Pulls the access_token that had been previously set, either manually or through a previous authentication
+   */
   public function getAccessToken() {
 
     return $this->_access_token;
 
   } // getToken
 
+  /**
+   * After authenticating with the oAuth API, store the access_token before making authenticated requests
+   * 
+   * @param string $access_token
+   */
   public function setAccessToken( $access_token ) {
 
     $this->_access_token = $access_token;
 
   } // setAccessToken
 
+  /**
+   * Sets the user object from the token authentication response to be reused
+   * 
+   * @param Object $user
+   */
+  public function setAuthenticatedUser( $user ) {
+  
+    $this->_user = $user;
+  
+  } // setAuthenticatedUser
+   
+  /**
+   * When available, returns the currently authenticated user object
+   * 
+   * @return Object|null
+   */
+  public function getAuthenticatedUser() {
+  
+    return $this->_user;
+    
+  } // getAuthenticatedUser
+  
   /**
    * Retrieves a full Project, by ID
    *
@@ -158,7 +190,6 @@ class Be_Api {
     return $this->_getDecodedJson( $endpoint, array(), 'project', $assoc );
 
   } // getProject
-
 
   /**
    * Retrieves a list of a projects comments, by project ID
@@ -180,7 +211,6 @@ class Be_Api {
 
   } // getProjectComments
 
-
   /**
    * Retrieves a full User, based on either their ID or Username
    *
@@ -196,7 +226,6 @@ class Be_Api {
     return $this->_getDecodedJson( $endpoint, array(), 'user', $assoc );
 
   } // getUser
-
 
   /**
    * Retrieves a list of $id_or_username's projects
@@ -295,7 +324,7 @@ class Be_Api {
    * 
    * @return array                      : stdClass objects or associative arrays, based on $assoc
    */
-   public function getUserFeedbackCircle( $id_or_username, $options = array(), $assoc = false ) {
+  public function getUserFeedbackCircle( $id_or_username, $options = array(), $assoc = false ) {
 
     $endpoint = self::ENDPOINT_USERS . '/' . $id_or_username . '/feedback';
 
@@ -307,6 +336,7 @@ class Be_Api {
            : $results;
   
   } // getUserFeedbackCircle
+  
   /**
    * Retrieves a list of $id_or_username's works in progress
    *
@@ -327,17 +357,17 @@ class Be_Api {
 
   } // getUserWips
 
- /**
-  * Create new Work in Progress ( WIP )
-  *
-  * @param  string          $image_path  : full image path
-  * @param  string          $title       : title of WIP
-  * @param  array           $tags        : tags assoicated with wip
-  * @param  string          $description : description of wip
-  * @param  boolean         $assoc       : return objects will be converted to associative arrays
-  *
-  * @return array                        : stdClass objects or associative arrays, based on $assoc
-  */
+  /**
+   * Create new Work in Progress ( WIP )
+   *
+   * @param  string          $image_path  : full image path
+   * @param  string          $title       : title of WIP
+   * @param  array           $tags        : tags assoicated with wip
+   * @param  string          $description : description of wip
+   * @param  boolean         $assoc       : return objects will be converted to associative arrays
+   *
+   * @return array                        : stdClass objects or associative arrays, based on $assoc
+   */
   public function createUserWip( $image_path, $title, array $tags, $description = '', $assoc = false ) {
 
     $endpoint               = self::ENDPOINT_WIPS;
@@ -793,7 +823,6 @@ class Be_Api {
 
   } //getUserStats
 
-
   /**
    * View project
    * - increments project view counter
@@ -1036,6 +1065,9 @@ class Be_Api {
 
   } // unfollowUser
 
+  
+  
+  
   /**
    * Automates retrieval data from $endpoint, using $query_params, and returns stdClass based on presence of $root_node
    *
@@ -1069,7 +1101,6 @@ class Be_Api {
            : $entity->{$root_node};
 
   } // _getDecodedJson
-
 
   /**
    * Performs a GET request, isolates caller from exceptions
@@ -1209,7 +1240,6 @@ class Be_Api {
     return $full_url;
 
   } // _makeFullURL
-
 
   /**
    * Makes a remote request to $url
