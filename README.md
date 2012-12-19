@@ -1,3 +1,5 @@
+![Behance API Logo](http://assets.behance.net/img/dev/gear.png)
+
 Behance Network API / PHP (5.2+)
 ================================
 
