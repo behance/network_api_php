@@ -1066,6 +1066,17 @@ class Be_Api {
   } // unfollowUser
 
   
+  /**
+   * Change the URL root of the Behance API, mostly for testing purposes
+   * 
+   * @param string $url : protocol + fully qualified domain to use instead of https://www.behance.net/v2
+   */
+  public function setApiRoot( $url ) {
+
+    // IMPORTANT: Since each segment appended to this starts with a slash, don't end with a slash
+    $this->_api_root = rtrim( $url, '/' );
+
+  } // setApiRoot
   
   
   /**
