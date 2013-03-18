@@ -574,14 +574,16 @@ class Be_Api {
   /**
    * Get user's activity feed
    *
-   * @param  boolean $assoc :return objects will be converted to associative arrays
+   * @param  int|bool $offset_ts :used for paging, timestamp received as "earliest_ts" in the previous feed request if "has_more" is true
+   * @param  boolean $assoc      :return objects will be converted to associative arrays
    *
    * @return array          :stdClass objects or associative arrays, based on $assoc
    */
-  public function getUserActivity( $assoc = false ) {
+  public function getUserActivity( $offset_ts = false, $assoc = false ) {
 
     $endpoint = self::ENDPOINT_ACTIVITY ;
-
+    
+    $params['offset_ts']    = $offset_ts;
     $params['access_token'] = $this->_access_token;
 
     $results = $this->_getDecodedJson( $endpoint, $params, 'activity', $assoc );
