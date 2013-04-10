@@ -23,7 +23,7 @@ class Be_Api {
   const ENDPOINT_ACTIVITY     = '/activity';
   const ENDPOINT_AUTHENTICATE = '/oauth/authenticate';
   const ENDPOINT_TOKEN        = '/oauth/token';
-
+  const ENDPOINT_FIELDS       = '/fields';
 
   const TIMEOUT_DEFAULT_SEC  = 30;
   const VALID                = 1;
@@ -128,7 +128,7 @@ class Be_Api {
 
     $this->setAccessToken( $response->access_token );
     $this->setAuthenticatedUser( $response->user );
-    
+
     return $this->_access_token;
 
   } // exchangeCodeForToken
@@ -144,7 +144,7 @@ class Be_Api {
 
   /**
    * After authenticating with the oAuth API, store the access_token before making authenticated requests
-   * 
+   *
    * @param string $access_token
    */
   public function setAccessToken( $access_token ) {
@@ -155,26 +155,26 @@ class Be_Api {
 
   /**
    * Sets the user object from the token authentication response to be reused
-   * 
+   *
    * @param Object $user
    */
   public function setAuthenticatedUser( $user ) {
-  
+
     $this->_user = $user;
-  
+
   } // setAuthenticatedUser
-   
+
   /**
    * When available, returns the currently authenticated user object
-   * 
+   *
    * @return Object|null
    */
   public function getAuthenticatedUser() {
-  
+
     return $this->_user;
-    
+
   } // getAuthenticatedUser
-  
+
   /**
    * Retrieves a full Project, by ID
    *
@@ -231,14 +231,15 @@ class Be_Api {
    * Retrieves a list of $id_or_username's projects
    *
    * @param int|string $id_or_username : user's projects to search
+   * @param  array     $options        : search options
    * @param bool       $assoc          : return objects will be converted to associative arrays
    *
    * @return array                     : stdClass objects or associative arrays, based on $assoc
    */
-  public function getUserProjects( $id_or_username, $assoc = false ) {
+  public function getUserProjects( $id_or_username, $options = array(), $assoc = false ) {
 
     $endpoint = self::ENDPOINT_USERS . '/' . $id_or_username . '/projects';
-    $results  = $this->_getDecodedJson( $endpoint, array(), 'projects', $assoc );
+    $results  = $this->_getDecodedJson( $endpoint, $options, 'projects', $assoc );
 
     // IMPORTANT: Ensure this will always return an array
     return ( empty( $results ) )
@@ -274,7 +275,7 @@ class Be_Api {
    * @param  int|string $id_or_username : user
    * @param  bool       $assoc          : return objects will be converted to associative arrays
    * @param  array      $options        : search options
-   * 
+   *
    * @return array                      : stdClass objects or associative arrays, based on $assoc
    */
   public function getUserFollows( $id_or_username, $options = array(), $assoc = false ) {
@@ -287,7 +288,7 @@ class Be_Api {
     return ( empty( $results ) )
            ? array()
            : $results;
-  
+
   } // getUserFollows
 
   /**
@@ -296,13 +297,13 @@ class Be_Api {
    * @param  int|string $id_or_username : user
    * @param  bool       $assoc          : return objects will be converted to associative arrays
    * @param  array      $options        : search options
-   * 
+   *
    * @return array                      : stdClass objects or associative arrays, based on $assoc
    */
   public function getUserFollowers( $id_or_username, $options = array(), $assoc = false ) {
 
     $endpoint = self::ENDPOINT_USERS . '/' . $id_or_username . '/followers';
-    
+
     if ( !empty( $this->_access_token ) )
       $options['access_token'] = $this->_access_token;
 
@@ -312,16 +313,16 @@ class Be_Api {
     return ( empty( $results ) )
            ? array()
            : $results;
-  
+
   } // getUserFollowers
 
   /**
    * Retrieves a list of users in the given user's feedback circle
    *
-   * @param  int|string $id_or_username : user 
+   * @param  int|string $id_or_username : user
    * @param  bool       $assoc          : return objects will be converted to associative arrays
    * @param  array      $options        : search options
-   * 
+   *
    * @return array                      : stdClass objects or associative arrays, based on $assoc
    */
   public function getUserFeedbackCircle( $id_or_username, $options = array(), $assoc = false ) {
@@ -334,21 +335,22 @@ class Be_Api {
     return ( empty( $results ) )
            ? array()
            : $results;
-  
+
   } // getUserFeedbackCircle
-  
+
   /**
    * Retrieves a list of $id_or_username's works in progress
    *
    * @param  int|string $id_or_username : user's works in progress to search
+   * @param  array      $options        : search options
    * @param  bool       $assoc          : return objects will be converted to associative arrays
    *
    * @return array                      : stdClass objects or associative arrays, based on $assoc
    */
-  public function getUserWips( $id_or_username, $assoc = false ) {
+  public function getUserWips( $id_or_username, $options = array(), $assoc = false ) {
 
     $endpoint = self::ENDPOINT_USERS . '/' . $id_or_username . '/wips';
-    $results  = $this->_getDecodedJson( $endpoint, array(), 'wips', $assoc );
+    $results  = $this->_getDecodedJson( $endpoint, $options, 'wips', $assoc );
 
     // IMPORTANT: Ensure this will always return an array
     return ( empty( $results ) )
@@ -392,14 +394,14 @@ class Be_Api {
 
   /**
    * Create new Work in Progress ( WIP ) revision
-   * 
+   *
    * @param  int             $wip_id      : wip id
    * @param  string          $image_path  : full image path
    * @param  string          $title       : title of WIP
    * @param  array           $tags        : tags assoicated with wip revision
    * @param  string          $description : description of wip revision
    * @param  boolean $assoc        : return objects will be converted to associative arrays
-   * 
+   *
    * @return array                 : stdClass objects or associative arrays, based on $assoc
    */
   public function createUserWipRevision( $wip_id, $image_path, $title, array $tags, $description = '', $assoc = false ) {
@@ -412,7 +414,7 @@ class Be_Api {
     $post_body['image']        = '@' . $image_path;
     $post_body['title']        = $title;
     $post_body['description']  = $description;
-    
+
 
     $curl_params[ CURLOPT_HTTPHEADER ] = array( 'Content-Type: multipart/form-data' );
 
@@ -452,11 +454,11 @@ class Be_Api {
 
   /**
    * Update WIP title
-   * 
+   *
    * @param  string  $wip_id       : WIP to be updated
    * @param  string  $title        : WIP title
    * @param  boolean $assoc        : return objects will be converted to associative arrays
-   * 
+   *
    * @return array                 : stdClass objects or associative arrays, based on $assoc
    */
   public function updateUserWipTitle( $wip_id, $title, $assoc = false ) {
@@ -466,7 +468,7 @@ class Be_Api {
     $query_params['access_token'] = $this->_access_token;
 
     $put_body['title']            = $title;
-   
+
     $response = $this->_put( $endpoint, $query_params, $put_body );
 
     return ( empty( $response ) )
@@ -503,12 +505,12 @@ class Be_Api {
 
   /**
    * Post WIP comment
-   * 
+   *
    * @param  string  $wip_id      : WIP to comment on
    * @param  string  $revision_id : WIP revision to comment on
    * @param  string  $comment     : comment text
    * @param  boolean $assoc       : return objects will be converted to associative arrays
-   * 
+   *
    * @return array                : stdClass objects or associative arrays, based on $assoc
    */
   public function postWipComment( $wip_id, $revision_id, $comment, $assoc = false ) {
@@ -523,7 +525,7 @@ class Be_Api {
     return ( empty( $response ) )
            ? false
            : json_decode( $response, $assoc );
-  
+
   } // postProjectComment
 
   /**
@@ -582,7 +584,7 @@ class Be_Api {
   public function getUserActivity( $offset_ts = false, $assoc = false ) {
 
     $endpoint = self::ENDPOINT_ACTIVITY ;
-    
+
     $params['offset_ts']    = $offset_ts;
     $params['access_token'] = $this->_access_token;
 
@@ -873,7 +875,7 @@ class Be_Api {
 
   /**
    * Post project comment
-   * 
+   *
    * @param  int    $id      : project to post comment
    * @param  string $comment : comment to post
    * @param  bool   $assoc   : return objects will be converted to associative arrays
@@ -888,11 +890,11 @@ class Be_Api {
     $body_params['comment']       = $comment;
 
     $response = $this->_post( $endpoint, $query_params, $body_params );
-    
+
     return ( empty( $response ) )
            ? false
            : json_decode( $response, $assoc );
-  
+
   } // postProjectComment
 
   /**
@@ -1067,10 +1069,29 @@ class Be_Api {
 
   } // unfollowUser
 
-  
+  /**
+   * Get creative fields
+   *
+   * @param bool    $assoc : return objects will be converted to associative arrays
+   *
+   * @return array         : stdClass objects or associative arrays, based on $assoc
+   */
+  public function getFields( $assoc =  false ) {
+
+    $endpoint = self::ENDPOINT_FIELDS;
+
+    $results  = $this->_getDecodedJson( $endpoint, array(), '', $assoc );
+
+    // IMPORTANT: Ensure this will always return an array
+    return ( empty( $results ) )
+           ? array()
+           : $results;
+
+  } // getFields
+
   /**
    * Change the URL root of the Behance API, mostly for testing purposes
-   * 
+   *
    * @param string $url : protocol + fully qualified domain to use instead of https://www.behance.net/v2
    */
   public function setApiRoot( $url ) {
@@ -1079,8 +1100,8 @@ class Be_Api {
     $this->_api_root = rtrim( $url, '/' );
 
   } // setApiRoot
-  
-  
+
+
   /**
    * Automates retrieval data from $endpoint, using $query_params, and returns stdClass based on presence of $root_node
    *
@@ -1091,7 +1112,7 @@ class Be_Api {
    *
    * @return stdClass|bool
    */
-  protected function _getDecodedJson( $endpoint, array $query_params, $root_node, $assoc ) {
+  protected function _getDecodedJson( $endpoint, array $query_params = array(), $root_node = '', $assoc = false ) {
 
     $query_params['client_id'] = $this->_client_id;
     $entity = $this->_get( $endpoint, $query_params );
@@ -1100,6 +1121,9 @@ class Be_Api {
       return false;
 
     $entity = json_decode( $entity, $assoc );
+
+    if ( !$root_node )
+      return $entity;
 
     if ( $assoc ) {
 
