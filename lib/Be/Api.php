@@ -309,7 +309,7 @@ class Be_Api {
     $endpoint = self::ENDPOINT_USERS . '/' . $id_or_username . '/followers';
 
     if ( !empty( $this->_access_token ) )
-      $options['access_token'] = $this->_access_token;
+      $options[ self::ACCESS_TOKEN_KEY ] = $this->_access_token;
 
     $results = $this->_getDecodedJson( $endpoint, $options, 'followers', $assoc );
 
@@ -323,9 +323,9 @@ class Be_Api {
   /**
    * Retrieves a list of users in the given user's feedback circle
    *
-   * @param  int|string $id_or_username  user
-   * @param  bool       $assoc           return objects will be converted to associative arrays
-   * @param  array      $options         search options
+   * @param  int|string $id_or_username : user
+   * @param  bool       $assoc          : return objects will be converted to associative arrays
+   * @param  array      $options        : search options
    *
    * @return array                       stdClass objects or associative arrays, based on $assoc
    */
@@ -589,10 +589,10 @@ class Be_Api {
    */
   public function getUserActivity( $offset_ts = false, $assoc = false ) {
 
-    $endpoint = self::ENDPOINT_ACTIVITY ;
+    $endpoint                         = self::ENDPOINT_ACTIVITY ;
 
-    $params['offset_ts']    = $offset_ts;
-    $params['access_token'] = $this->_access_token;
+    $params['offset_ts']              = $offset_ts;
+    $params[ self::ACCESS_TOKEN_KEY ] = $this->_access_token;
 
     $results = $this->_getDecodedJson( $endpoint, $params, 'activity', $assoc );
 
