@@ -243,7 +243,7 @@ class Be_Api {
   public function getUserProjects( $id_or_username, $params = array(), $assoc = false ) {
 
     $endpoint = self::ENDPOINT_USERS . '/' . $id_or_username . '/projects';
-    $results  = $this->_getDecodedJson( $endpoint, $options, 'projects', $assoc );
+    $results  = $this->_getDecodedJson( $endpoint, $params, 'projects', $assoc );
 
     // IMPORTANT: Ensure this will always return an array
     return ( empty( $results ) )
@@ -356,7 +356,7 @@ class Be_Api {
   public function getUserWips( $id_or_username, $params = array(), $assoc = false ) {
 
     $endpoint = self::ENDPOINT_USERS . '/' . $id_or_username . '/wips';
-    $results  = $this->_getDecodedJson( $endpoint, $options, 'wips', $assoc );
+    $results  = $this->_getDecodedJson( $endpoint, $params, 'wips', $assoc );
 
     // IMPORTANT: Ensure this will always return an array
     return ( empty( $results ) )
