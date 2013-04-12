@@ -29,6 +29,8 @@ class Be_Api {
   const VALID                = 1;
   const INVALID              = 0;
 
+  const ACCESS_TOKEN_KEY     = 'access_token';
+
   protected $_api_root       = 'https://www.behance.net/v2';
 
   protected $_client_id,
@@ -376,9 +378,9 @@ class Be_Api {
    */
   public function createUserWip( $image_path, $title, array $tags, $description = '', $assoc = false ) {
 
-    $endpoint               = self::ENDPOINT_WIPS;
+    $endpoint                                = self::ENDPOINT_WIPS;
 
-    $query_params['access_token'] = $this->_access_token;
+    $query_params[ self::ACCESS_TOKEN_KEY ] = $this->_access_token;
 
     $post_body['tags']         = implode( '|', $tags );
     $post_body['image']        = '@' . $image_path;
@@ -412,7 +414,7 @@ class Be_Api {
 
     $endpoint = self::ENDPOINT_WIPS . '/' . $id;
 
-    $query_params['access_token'] = $this->_access_token;
+    $query_params[ self::ACCESS_TOKEN_KEY ] = $this->_access_token;
 
     $post_body['tags']         = implode( '|', $tags );
     $post_body['image']        = '@' . $image_path;
@@ -444,7 +446,7 @@ class Be_Api {
 
     $endpoint = self::ENDPOINT_WIPS . '/' . $wip_id . '/' . $revision_id;
 
-    $query_params['access_token'] = $this->_access_token;
+    $query_params[ self::ACCESS_TOKEN_KEY ] = $this->_access_token;
 
     $put_body['description']      = $description;
 
@@ -469,7 +471,7 @@ class Be_Api {
 
     $endpoint = self::ENDPOINT_WIPS . '/' . $wip_id ;
 
-    $query_params['access_token'] = $this->_access_token;
+    $query_params[ self::ACCESS_TOKEN_KEY ] = $this->_access_token;
 
     $put_body['title']            = $title;
 
@@ -495,7 +497,7 @@ class Be_Api {
 
     $endpoint = self::ENDPOINT_WIPS . '/' . $wip_id . '/' . $revision_id;
 
-    $query_params['access_token'] = $this->_access_token;
+    $query_params[ self::ACCESS_TOKEN_KEY ] = $this->_access_token;
 
     $put_body['tags']             = implode( '|', $tags );
 
@@ -521,7 +523,7 @@ class Be_Api {
 
     $endpoint = self::ENDPOINT_WIPS . '/' . $id . '/' . $revision_id . '/comments';
 
-    $query_params['access_token'] = $this->_access_token;
+    $query_params[ self::ACCESS_TOKEN_KEY ] = $this->_access_token;
     $body_params['comment']       = $comment;
 
     $response = $this->_post( $endpoint, $query_params, $body_params );
@@ -545,7 +547,7 @@ class Be_Api {
 
     $endpoint = self::ENDPOINT_WIPS . '/' . $wip_id . '/' . $revision_id;
 
-    $query_params['access_token'] = $this->_access_token;
+    $query_params[ self::ACCESS_TOKEN_KEY ] = $this->_access_token;
 
     $response = $this->_delete( $endpoint, $query_params );
 
@@ -567,7 +569,7 @@ class Be_Api {
 
     $endpoint = self::ENDPOINT_WIPS . '/' . $wip_id ;
 
-    $query_params['access_token'] = $this->_access_token;
+    $query_params[ self::ACCESS_TOKEN_KEY ] = $this->_access_token;
 
     $response = $this->_delete( $endpoint, $query_params );
 
@@ -656,7 +658,7 @@ class Be_Api {
 
     $endpoint = self::ENDPOINT_COLLECTIONS;
 
-    $query_params['access_token'] = $this->_access_token;
+    $query_params[ self::ACCESS_TOKEN_KEY ] = $this->_access_token;
     $body_params['title']         = $title;
 
     if ( !empty( $project_ids ) )
@@ -683,7 +685,7 @@ class Be_Api {
 
     $endpoint = self::ENDPOINT_COLLECTIONS . '/' . $id;
 
-    $query_params['access_token'] = $this->_access_token;
+    $query_params[ self::ACCESS_TOKEN_KEY ] = $this->_access_token;
 
     $response = $this->_delete( $endpoint, $query_params );
 
@@ -706,7 +708,7 @@ class Be_Api {
 
     $endpoint = self::ENDPOINT_COLLECTIONS . '/' . $id;
 
-    $query_params['access_token'] = $this->_access_token;
+    $query_params[ self::ACCESS_TOKEN_KEY ] = $this->_access_token;
     $body_params['title']         = $title;
 
     $response = $this->_put( $endpoint, $query_params, $body_params );
@@ -753,7 +755,7 @@ class Be_Api {
 
     $projects = implode( '|', $project_ids );
 
-    $query_params['access_token'] = $this->_access_token;
+    $query_params[ self::ACCESS_TOKEN_KEY ] = $this->_access_token;
 
     $body_params['projects']      = $projects;
 
@@ -779,7 +781,7 @@ class Be_Api {
 
     $endpoint = self::ENDPOINT_COLLECTIONS . '/' . $id . '/projects/' . $project_id;
 
-    $query_params['access_token'] = $this->_access_token;
+    $query_params[ self::ACCESS_TOKEN_KEY ] = $this->_access_token;
 
     $response = $this->_delete( $endpoint, $query_params );
 
@@ -845,7 +847,7 @@ class Be_Api {
 
     $endpoint = self::ENDPOINT_PROJECTS . '/' . $id . '/view';
 
-    $query_params['access_token'] = $this->_access_token;
+    $query_params[ self::ACCESS_TOKEN_KEY ] = $this->_access_token;
 
     $response  = $this->_post( $endpoint, $query_params );
 
@@ -867,7 +869,7 @@ class Be_Api {
 
     $endpoint = self::ENDPOINT_PROJECTS . '/' . $id . '/appreciate';
 
-    $query_params['access_token'] = $this->_access_token;
+    $query_params[ self::ACCESS_TOKEN_KEY ] = $this->_access_token;
 
     $response  = $this->_post( $endpoint, $query_params );
 
@@ -890,7 +892,7 @@ class Be_Api {
 
     $endpoint = self::ENDPOINT_PROJECTS . '/' . $id . '/comments';
 
-    $query_params['access_token'] = $this->_access_token;
+    $query_params[ self::ACCESS_TOKEN_KEY ] = $this->_access_token;
     $body_params['comment']       = $comment;
 
     $response = $this->_post( $endpoint, $query_params, $body_params );
@@ -913,7 +915,7 @@ class Be_Api {
 
     $endpoint = self::ENDPOINT_COLLECTIONS . '/' . $id . '/follow';
 
-    $query_params['access_token'] = $this->_access_token;
+    $query_params[ self::ACCESS_TOKEN_KEY ] = $this->_access_token;
 
     $response  = $this->_post( $endpoint, $query_params );
 
@@ -935,7 +937,7 @@ class Be_Api {
 
     $endpoint = self::ENDPOINT_COLLECTIONS . '/' . $id . '/follow';
 
-    $query_params['access_token'] = $this->_access_token;
+    $query_params[ self::ACCESS_TOKEN_KEY ] = $this->_access_token;
 
     $response  = $this->_delete( $endpoint, $query_params );
 
@@ -1041,7 +1043,7 @@ class Be_Api {
 
     $endpoint = self::ENDPOINT_USERS . "/{$id_or_username}/follow";
 
-    $query_params['access_token'] = $this->_access_token;
+    $query_params[ self::ACCESS_TOKEN_KEY ] = $this->_access_token;
 
     $response  = $this->_post( $endpoint, $query_params );
 
@@ -1063,7 +1065,7 @@ class Be_Api {
 
     $endpoint = self::ENDPOINT_USERS . "/{$id_or_username}/follow";
 
-    $query_params['access_token'] = $this->_access_token;
+    $query_params[ self::ACCESS_TOKEN_KEY ] = $this->_access_token;
 
     $response  = $this->_delete( $endpoint, $query_params );
 
