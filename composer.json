@@ -15,6 +15,11 @@
             "name": "Michael Klein",
             "email": "klein@adobe.com",
             "homepage": "https://twitter.com/mikeklein13"
+        },
+        {
+            "name": "Mark Dunphy",
+            "email": "dunphy@adobe.com",
+            "homepage": "https://twitter.com/dunphtastic"
         }
     ],
     "require": {
@@ -22,6 +27,6 @@
         "ext-curl": "*"
     },
     "autoload": {
-        "psr-0": {"Be": "lib/"}
+        "psr-4": {"Behance\\": "src/"}
     }
 }
