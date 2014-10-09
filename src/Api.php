@@ -521,90 +521,6 @@ class Api {
   } // _get
 
   /**
-   * Performs a POST request, isolates caller from Apiexceptions
-   *
-   * @param string $endpoint      just the segment of the API the request
-   * @param array  $query_params  anything additional to add to the query string, in key => value form
-   *
-   * @return string|bool          response body on success, false on failure
-   */
-  protected function _post( $endpoint, array $query_params = array(), $post_body = array(), $curl_params = array() ) {
-
-    $full_url = $this->_makeFullURL( $endpoint, $query_params );
-
-    try {
-      return $this->_executeRequest( 'POST', $full_url, $post_body, $curl_params );
-    } // try
-
-    catch( ApiException $e ) {
-
-      if ( $this->_debug ) {
-        echo( __CLASS__ . "::" . __LINE__ . ": " . $e->getMessage() );
-      }
-
-    } // catch ApiException
-
-    return false;
-
-  } // _post
-
-  /**
-   * Performs a PUT request, isolates caller from Apiexceptions
-   *
-   * @param string $endpoint      just the segment of the API the request
-   * @param array  $query_params  anything additional to add to the query string, in key => value form
-   *
-   * @return string|bool          response body on success, false on failure
-   */
-  protected function _put( $endpoint, array $query_params = array(), $put_body = array(), $curl_params = array() ) {
-
-    $full_url = $this->_makeFullURL( $endpoint, $query_params );
-
-    try {
-      return $this->_executeRequest( 'PUT', $full_url, $put_body, $curl_params );
-    } // try
-
-    catch( ApiException $e ) {
-
-      if ( $this->_debug ) {
-        echo( __CLASS__ . "::" . __LINE__ . ": " . $e->getMessage() );
-      }
-
-    } // catch ApiException
-
-    return false;
-
-  } // _put
-
-  /**
-   * Performs a DELETE request, isolates caller from Apiexceptions
-   *
-   * @param string $endpoint      just the segment of the API the request
-   * @param array  $query_params  anything additional to add to the query string, in key => value form
-   *
-   * @return string|bool          response body on success, false on failure
-   */
-  protected function _delete( $endpoint, array $query_params = array(), $delete_body = array(), $curl_params = array() ) {
-
-    $full_url = $this->_makeFullURL( $endpoint, $query_params );
-
-    try {
-      return $this->_executeRequest( 'DELETE', $full_url, $delete_body, $curl_params );
-    } // try
-
-    catch( ApiException $e ) {
-
-      if ( $this->_debug ) {
-        echo( __CLASS__ . "::" . __LINE__ . ": " . $e->getMessage() );
-      }
-
-    } // catch ApiException
-
-    return false;
-
-  } // _delete
-
-  /**
    * Generates a fully-quality API url, with $endpoint + $query_params, automatically adds in app's key
    *
    * @param string $endpoint      segment of the API being accessed
@@ -613,7 +529,7 @@ class Api {
   protected function _makeFullURL( $endpoint, array $query_params = array() ) {
 
     $query_string = '?' . http_build_query( $query_params );
-    $full_url     = $this->_api_root . $endpoint . $query_string;
+    $full_url     = self::API_ROOT . $endpoint . $query_string;
 
     return $full_url;
 
