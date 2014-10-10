@@ -7,41 +7,52 @@ Basic implementation to access User, Project, Work in Progress and Collection da
 
 See [http://be.net/dev](http://be.net/dev) for more information and documentation.
 
+Authentication
+--------------------
+Get an API key by registering your application here: [http://be.net/dev/register](http://be.net/dev/register)
 
-Installation / Usage
+
+Install via Composer
 --------------------
 
-1. Please register for an application ID + key first: [http://be.net/dev/register](http://be.net/dev/register)
-2. Usage.
+```json
+{
+   "require": {
+     "behance/api-network": "~2.0.0"
+   }
+}
+```
 
-   ``` php
-   require_once( './lib/Be/Api.php' );
+Usage
+--------------------
 
-   $api = new Be_Api( $client_id, $client_secret );
+``` php
+require_once( './vendor/autoload.php' );
 
-   // User data
-   $api->getUser( 'bryan' );
+$client = new Behance\Client( $client_id );
 
-   // User's list of projects
-   $api->getUserProjects( 'bryan' );
+// User data
+$client->getUser( 'bryan' );
 
-   // User's work in progress
-   $api->getUserWips( 'cfaydi' );
+// User's list of projects
+$client->getUserProjects( 'bryan' );
 
-   // Project data
-   $api->getProject( 2812719 );
+// User's work in progress
+$client->getUserWips( 'cfaydi' );
 
-   // Project's comments
-   $api->getProjectComments( 2812719 );
+// Project data
+$client->getProject( 2812719 );
 
-   // Featured project list
-   $api->searchProjects( array() );
+// Project's comments
+$client->getProjectComments( 2812719 );
 
+// Featured project list
+$client->searchProjects( array() );
 
-   // Search for motorcycles
-   $api->searchProjects( array( 'q' => 'motorcycles' ) );
+// Search for motorcycles
+$client->searchProjects( array( 'q' => 'motorcycles' ) );
 
-   ```
+```
 
 Requirements
 ------------
