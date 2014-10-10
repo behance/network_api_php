@@ -82,7 +82,7 @@ class ClientTest extends PHPUnit_Framework_TestCase {
     $message = ob_get_clean();
 
     $this->assertFalse( $response );
-  $this->assertContains( "403", $message );
+    $this->assertContains( "403", $message );
 
   } // getProjectFailureDebugMode
 

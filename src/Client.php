@@ -553,7 +553,6 @@ class Client {
 
     curl_close( $ch );
 
-    // @throws ApiException on response non-2xx (success) responses from service
     if ( (int)round( $response_code, -2 ) !== 200 ) {
       throw new ApiException( "Unsuccessful Request, response ({$response_code}): " . ( empty( $response_body ) ? '' : ": {$response_body} " ) );
     }
