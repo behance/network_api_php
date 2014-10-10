@@ -15,7 +15,7 @@ namespace Behance;
  * @link     http://be.net/dev
  *
  */
-class Api {
+class Client {
 
   const API_ROOT               = 'https://www.behance.net/v2';
   const ENDPOINT_PROJECTS      = '/projects';
@@ -47,10 +47,6 @@ class Api {
    * @param bool   $debug: OUTPUTS failures if they occur (non-2xx responses)
    */
   public function __construct( $client_id, $debug = false ) {
-
-    if ( !extension_loaded( 'curl' ) ) {
-      throw new ApiException( 'cURL module is required' );
-    }
 
     $this->_client_id = $client_id;
     $this->_debug     = $debug;
@@ -196,28 +192,6 @@ class Api {
            : $results;
 
   } // getUserFollowers
-
-  /**
-   * Retrieves a list of users in the given user's feedback circle
-   *
-   * @param  int|string $id_or_username : user
-   * @param  bool       $assoc          : return objects will be converted to associative arrays
-   * @param  array      $options        : search options
-   *
-   * @return array                       stdClass objects or associative arrays, based on $assoc
-   */
-  public function getUserFeedbackCircle( $id_or_username, $options = array(), $assoc = false ) {
-
-    $endpoint = self::ENDPOINT_USERS . '/' . $id_or_username . '/feedback';
-
-    $results  = $this->_getDecodedJson( $endpoint, $options, 'feedback_circlezz', $assoc );
-
-    // IMPORTANT: Ensure this will always return an array
-    return ( empty( $results ) )
-           ? array()
-           : $results;
-
-  } // getUserFeedbackCircle
 
   /**
    * Retrieves a list of $id_or_username's works in progress
@@ -549,6 +523,10 @@ class Api {
    */
   protected function _executeRequest( $method, $url, $request_body = false, $curl_params = array() ) {
 
+    if ( !$this->_isCurlLoaded() ) {
+      throw new ApiException( 'cURL module is required' );
+    }
+
     $user_agent          = "Behance API/PHP (App {$this->_client_id})";
     $default_curl_params = array(
         CURLOPT_HTTPHEADER => array(
@@ -556,114 +534,24 @@ class Api {
             'Content-Type: multipart/form-data',
             'Expect:'
         ),
-        CURLOPT_TIMEOUT         => self::TIMEOUT_DEFAULT_SEC,
-        CURLOPT_USERAGENT       => $user_agent,
-        CURLOPT_RETURNTRANSFER  => true,
-        CURLOPT_BINARYTRANSFER  => true,
-        CURLOPT_HEADER          => true,
-        CURLOPT_SSL_VERIFYPEER  => false
+        CURLOPT_TIMEOUT        => self::TIMEOUT_DEFAULT_SEC,
+        CURLOPT_USERAGENT      => $user_agent,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_BINARYTRANSFER => true,
+        CURLOPT_SSL_VERIFYPEER => false,
+        CURLOPT_POST           => false,
+        CURLOPT_HTTPGET        => true
     );
 
-    // Replace recursive will knock this *into* an array afterwards
-    if ( !empty( $curl_params[ CURLOPT_HTTPHEADER ] ) ) {
-      unset( $default_curl_params[ CURLOPT_HTTPHEADER ] );
-    }
-
     $curl_params = array_replace_recursive( $default_curl_params, $curl_params );
-    $method      = strtoupper( $method );
-
-    switch ( $method ) {
-
-      case 'GET':
-
-        $curl_params[ CURLOPT_HTTPGET ] = true;
-        $curl_params[ CURLOPT_POST ]    = false;
-        break;
-
-      case 'POST':
-
-        $curl_params[ CURLOPT_HTTPGET ] = false;
-        $curl_params[ CURLOPT_POST ]    = true;
-
-        // IMPORTANT: Since @ is used to signify files in arrays passed to this option,
-        // pre-encode this array to prevent this from attempting to read a file
-        // if ( is_array( $request_body ) )
-        //   $request_body = http_build_query( $request_body );
-
-        // $curl_params[ CURLOPT_HTTPHEADER ][] = 'Content-Length: ' . strlen( $request_body );
-        $curl_params[ CURLOPT_POSTFIELDS ] = $request_body;
-        break;
-
-      case 'PUT':
-
-        $curl_params[ CURLOPT_HTTPGET ]       = false;
-        $curl_params[ CURLOPT_POST ]          = false;
-        $curl_params[ CURLOPT_CUSTOMREQUEST ] = 'PUT';
-
-        // IMPORTANT: Since @ is used to signify files in arrays passed to this option,
-        // pre-encode this array to prevent this from attempting to read a file
-        if ( is_array( $request_body ) ) {
-          $request_body = http_build_query( $request_body );
-        }
-
-        $curl_params[ CURLOPT_HTTPHEADER ][] = 'Content-Length: ' . strlen( $request_body );
-        $curl_params[ CURLOPT_POSTFIELDS ]   = $request_body;
-        break;
-
-      case 'DELETE':
-
-        $curl_params[ CURLOPT_HTTPGET ]       = false;
-        $curl_params[ CURLOPT_CUSTOMREQUEST ] = 'DELETE';
-
-        // IMPORTANT: Since @ is used to signify files in arrays passed to this option,
-        // pre-encode this array to prevent this from attempting to read a file
-        if ( is_array( $request_body ) ) {
-          $request_body = http_build_query( $request_body );
-        }
-
-        $curl_params[ CURLOPT_POSTFIELDS ] = $request_body;
-        break;
-
-      default:
-        throw new ApiException( "Unhandled method: [{$method}]" );
-
-    } // switch method
 
     $ch = curl_init( $url );
 
     curl_setopt_array( $ch, $curl_params );
 
-    $request_response = curl_exec( $ch );
-
-    $request_info  = curl_getinfo( $ch );
-    $response_code = curl_getinfo( $ch, CURLINFO_HTTP_CODE );
+    list( $response_body, $request_info, $response_code ) = $this->_executeCurl( $ch );
 
     curl_close( $ch );
-
-    $response_body = false;
-
-    if ( $request_info['download_content_length'] <= 0 ) {
-
-      $exploded = explode( "\r\n\r\n", $request_response );
-
-      while ( $exploded[0] == 'HTTP/1.1 100 Continue' ) {
-        array_shift( $exploded );
-      }
-
-      $response_body = ( isset( $exploded[1] ) )
-                       ? $exploded[1]
-                       : '';
-
-    } // if download_content_length = 0
-
-    else {
-      $response_body = substr( $request_response, -$request_info['download_content_length'] );
-    } // else
-
-    // Unless array_shift completely solves headers in body problem, leave this line in
-    if ( substr( $response_body, 0, 4 ) == 'HTTP' ) {
-      throw new ApiException( "Malformed response_body: " . var_export( $response_body, 1 ) );
-    }
 
     // @throws ApiException on response non-2xx (success) responses from service
     if ( (int)round( $response_code, -2 ) !== 200 ) {
@@ -674,4 +562,30 @@ class Api {
 
   } // _executeRequest
 
-} // Api
+  /**
+   * @codeCoverageIgnore
+   *
+   * @return boolean
+   */
+  protected function _isCurlLoaded() {
+
+    return extension_loaded( 'curl' );
+
+  } // _isCurlLoaded
+
+  /**
+   * @codeCoverageIgnore
+   *
+   * @return array
+   */
+  protected function _executeCurl( $ch ) {
+
+    $request_response = curl_exec( $ch );
+    $request_info     = curl_getinfo( $ch );
+    $response_code    = curl_getinfo( $ch, CURLINFO_HTTP_CODE );
+
+    return array( $request_response, $request_info, $response_code );
+
+  } // _executeCurl
+
+} // Client

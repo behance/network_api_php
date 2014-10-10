@@ -29,7 +29,7 @@ Usage
 ``` php
 require_once( './vendor/autoload.php' );
 
-$client = new Behance\Api( $client_id );
+$client = new Behance\Client( $client_id );
 
 // User data
 $client->getUser( 'bryan' );
